@@ -23,8 +23,20 @@
             
             <div class="space-y-4">
                 <!-- QR Reader Display -->
-                <div class="flex justify-center">
-                    <div id="qr-reader" class="w-full max-w-lg h-80 border-2 border-gray-200 rounded-lg overflow-hidden"></div>
+                <div class="w-full">
+                    <div id="qr-reader" class="w-full h-[350px] bg-gray-900 rounded-xl shadow-lg overflow-hidden relative">
+                        <!-- Scanner overlay when not active -->
+                        <div id="scanner-placeholder" class="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-xl">
+                            <div class="text-center">
+                                <div class="w-16 h-16 mx-auto mb-3 bg-primary-100 rounded-full flex items-center justify-center">
+                                    <svg class="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m-2 0h-2m3-4h2m-3 0V9a3 3 0 00-3-3H9m1-1V4m6 6v1m0-2a3 3 0 013 3v1m0 0v1m0-1h-1m-1 2v4"></path>
+                                    </svg>
+                                </div>
+                                <p class="text-sm text-gray-600">Initializing camera...</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <!-- Scanner Controls -->
@@ -225,6 +237,87 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
+        /* QR Scanner Styles - Inline for server compatibility */
+        #qr-reader {
+            border: none !important;
+            background: transparent !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            box-shadow: none !important;
+        }
+
+        #qr-reader.active #scanner-placeholder {
+            display: none !important;
+        }
+
+        #qr-reader__scan_region {
+            border: none !important;
+            background: transparent !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        #qr-reader video,
+        #qr-reader__scan_region > img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            border-radius: 0.75rem !important;
+            border: none !important;
+        }
+
+        #qr-reader__dashboard {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px) !important;
+            border: none !important;
+            border-radius: 0.5rem !important;
+            margin: 0.5rem !important;
+            padding: 0.75rem !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        #qr-reader__dashboard button {
+            background: rgb(59 130 246) !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 0.5rem !important;
+            padding: 0.5rem 1rem !important;
+            font-size: 0.875rem !important;
+            font-weight: 500 !important;
+            cursor: pointer !important;
+            transition: all 0.2s ease !important;
+        }
+
+        #qr-reader__dashboard button:hover {
+            background: rgb(37 99 235) !important;
+            transform: translateY(-1px) !important;
+        }
+
+        #qr-reader__header {
+            background: transparent !important;
+            border: none !important;
+            display: none !important;
+        }
+
+        #qr-reader__camera_permission_button,
+        #qr-reader__dashboard_section_swaplink,
+        #qr-reader__dashboard_section_csr,
+        #qr-reader select,
+        #qr-reader__status_span,
+        #qr-reader__filescan_input,
+        #qr-reader__scan_type_change,
+        .qr-reader__dashboard_section_csr {
+            display: none !important;
+        }
+
+        #qr-reader * {
+            box-shadow: none !important;
+        }
+
+        #qr-reader div[style*="border"] {
+            border: none !important;
+        }
     </style>
     @endpush
 
@@ -357,9 +450,13 @@
         
         // Clear and prepare the QR reader element
         const qrReader = document.getElementById('qr-reader');
-        qrReader.innerHTML = '';
-        qrReader.classList.remove('empty');
-        qrReader.classList.add('scanning');
+        const placeholder = document.getElementById('scanner-placeholder');
+        
+        // Hide placeholder and mark as active
+        if (placeholder) {
+            placeholder.style.display = 'none';
+        }
+        qrReader.classList.add('active');
         
         try {
             html5QrcodeScanner = new Html5Qrcode("qr-reader");
@@ -372,15 +469,20 @@
                     aspectRatio: 1.0
                 },
                 (decodedText) => {
-                    console.log('QR Code scanned:', decodedText);
+                    console.log('QR Code scanned - RAW TEXT:', decodedText);
+                    console.log('Type of decoded text:', typeof decodedText);
+                    console.log('Length:', decodedText.length);
+                    
                     const sponsorId = parseSponsorId(decodedText);
+                    console.log('Parsed sponsor ID:', sponsorId);
                     
                     if (sponsorId) {
                         stopQRScanner();
                         hideScannerSection();
                         fetchSponsorData(sponsorId);
                     } else {
-                        showStatus('error', 'Invalid QR code format');
+                        console.error('Failed to parse sponsor ID from:', decodedText);
+                        showStatus('error', `Invalid QR code format: ${decodedText}`);
                     }
                 },
                 (errorMessage) => {
@@ -475,6 +577,7 @@
     }
 
     function fetchSponsorData(sponsorId) {
+        console.log('Fetching sponsor data for ID:', sponsorId);
         showStatus('info', 'Looking up sponsor...');
         
         fetch(`/api/sponsors/${sponsorId}`, {
@@ -484,10 +587,15 @@
             }
         })
         .then(response => {
+            console.log('API Response status:', response.status);
             if (!response.ok) throw new Error('Network response was not ok');
             return response.json();
         })
         .then(data => {
+            console.log('API Response data:', data);
+            console.log('Sponsor location:', data.location);
+            console.log('Is location empty?', !data.location);
+            
             if (data.id) {
                 currentSponsor = data;
                 displaySponsorInfo(data);
@@ -504,12 +612,20 @@
     }
 
     function displaySponsorInfo(sponsor) {
+        console.log('Displaying sponsor info:', sponsor);
+        console.log('Location value:', sponsor.location, 'Type:', typeof sponsor.location);
+        
+        const locationHtml = sponsor.location && sponsor.location.trim() 
+            ? `<br><small class="text-gray-600"><strong>Location:</strong> ${sponsor.location}</small>` 
+            : '<br><small class="text-gray-500"><em>No location specified</em></small>';
+            
         document.getElementById('sponsor-details').innerHTML = `
             <div class="sponsor-info">
-                <div class="sponsor-name">${sponsor.name}</div>
-                <div class="sponsor-details">
-                    ${sponsor.company_name}
-                    ${sponsor.location ? `<br><small class="text-gray-600">${sponsor.location}</small>` : ''}
+                <div class="sponsor-name text-lg font-semibold">${sponsor.name}</div>
+                <div class="sponsor-details text-sm">
+                    <strong>Company:</strong> ${sponsor.company_name}
+                    ${locationHtml}
+                    ${sponsor.contact ? `<br><small class="text-gray-600"><strong>Contact:</strong> ${sponsor.contact}</small>` : ''}
                 </div>
             </div>
         `;
