@@ -27,6 +27,16 @@ class Settings extends Page implements HasForms
 
     protected static ?int $navigationSort = 999;
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->role === 'admin';
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
+
     public ?array $data = [];
     
     public $app_name = '';

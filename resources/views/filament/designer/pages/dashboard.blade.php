@@ -331,6 +331,97 @@
     let currentSponsor = null;
     let capturedPhotoBlob = null;
 
+    // Mobile navigation fix for Filament
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.innerWidth <= 1024) {
+            console.log('=== MOBILE NAVIGATION SETUP ===');
+            
+            // Wait for Filament to load
+            setTimeout(function() {
+                // Find the sidebar toggle button (multiple possible selectors)
+                const toggleBtn = document.querySelector('[aria-label="Toggle navigation"]') ||
+                                document.querySelector('[data-sidebar-toggle]') ||
+                                document.querySelector('.fi-topbar-nav-toggle') ||
+                                document.querySelector('[x-on\\:click*="sidebar"]') ||
+                                document.querySelector('button[type="button"]');
+                
+                const sidebar = document.querySelector('.fi-sidebar');
+                
+                console.log('Found toggle button:', !!toggleBtn);
+                console.log('Found sidebar:', !!sidebar);
+                
+                if (toggleBtn && sidebar) {
+                    // Override the toggle functionality
+                    toggleBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        console.log('Mobile nav: Toggle clicked');
+                        
+                        // Check current state
+                        const isHidden = sidebar.style.transform === 'translateX(-100%)' || 
+                                       sidebar.style.display === 'none' ||
+                                       sidebar.classList.contains('hidden');
+                        
+                        if (isHidden) {
+                            // Show sidebar
+                            sidebar.style.position = 'fixed';
+                            sidebar.style.top = '0';
+                            sidebar.style.left = '0';
+                            sidebar.style.height = '100vh';
+                            sidebar.style.width = '16rem';
+                            sidebar.style.zIndex = '50';
+                            sidebar.style.background = 'white';
+                            sidebar.style.transform = 'translateX(0)';
+                            sidebar.style.transition = 'transform 0.3s ease';
+                            sidebar.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.25)';
+                            sidebar.style.display = 'block';
+                            sidebar.classList.remove('hidden');
+                            
+                            // Add backdrop
+                            const backdrop = document.createElement('div');
+                            backdrop.className = 'mobile-sidebar-backdrop';
+                            backdrop.style.cssText = `
+                                position: fixed;
+                                inset: 0;
+                                background: rgba(0, 0, 0, 0.5);
+                                z-index: 40;
+                            `;
+                            document.body.appendChild(backdrop);
+                            
+                            // Close on backdrop click
+                            backdrop.addEventListener('click', function() {
+                                closeSidebar();
+                            });
+                            
+                            console.log('Mobile nav: Sidebar opened');
+                        } else {
+                            closeSidebar();
+                        }
+                    });
+                    
+                    function closeSidebar() {
+                        sidebar.style.transform = 'translateX(-100%)';
+                        const backdrop = document.querySelector('.mobile-sidebar-backdrop');
+                        if (backdrop) {
+                            backdrop.remove();
+                        }
+                        console.log('Mobile nav: Sidebar closed');
+                    }
+                    
+                    // Initially hide sidebar on mobile
+                    sidebar.style.transform = 'translateX(-100%)';
+                    
+                    console.log('Mobile navigation setup complete');
+                } else {
+                    console.log('Mobile navigation: Could not find required elements');
+                    console.log('All buttons:', document.querySelectorAll('button').length);
+                    console.log('Sidebar elements:', document.querySelectorAll('[class*="sidebar"]').length);
+                }
+            }, 1000); // Wait for Filament to fully load
+        }
+    });
+
     // Run initial JavaScript test
     console.log('=== INITIAL JAVASCRIPT TEST ===');
     console.log('JavaScript is executing');

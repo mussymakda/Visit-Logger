@@ -5,6 +5,17 @@
 
 echo "🚀 Starting Visit Logger deployment..."
 
+# Check for required build files
+if [ ! -f "public/build/manifest.json" ]; then
+    echo "❌ Build files missing! You need to:"
+    echo "   1. Run 'npm run build' on your local machine"
+    echo "   2. Upload the entire 'public/build/' directory to the server"
+    echo "   3. Re-run this deployment script"
+    exit 1
+fi
+
+echo "✅ Build files found"
+
 # Copy environment file
 if [ ! -f .env ]; then
     echo "📋 Creating .env file from example..."

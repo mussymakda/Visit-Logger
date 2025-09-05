@@ -391,13 +391,52 @@
         min-height: 280px;
     }
     
-    /* Hide desktop-only elements on mobile */
-    .fi-sidebar {
-        display: none;
-    }
-    
-    .fi-main {
-        margin-left: 0 !important;
+    /* Fix mobile navigation in Filament 4 */
+    @media (max-width: 1024px) {
+        /* Ensure the sidebar is hidden by default on mobile */
+        .fi-layout .fi-sidebar {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 16rem;
+            z-index: 50;
+            background: white;
+        }
+        
+        /* Show sidebar when Alpine.js opens it */
+        .fi-layout[x-data] .fi-sidebar[x-show] {
+            transform: translateX(0);
+        }
+        
+        /* Overlay backdrop */
+        .fi-layout::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 40;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        
+        .fi-layout[x-data].fi-sidebar-open::before {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* Main content area should not have left margin on mobile */
+        .fi-layout .fi-main-ctn {
+            margin-left: 0 !important;
+        }
+        
+        /* Make sure the topbar hamburger menu is visible */
+        .fi-topbar .fi-sidebar-toggle-btn {
+            display: flex !important;
+        }
     }
     
     /* Full-width layout on mobile */
