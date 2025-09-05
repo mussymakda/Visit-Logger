@@ -10,7 +10,11 @@ class VisitForm
     {
         return $schema
             ->components([
-                //
+                \Filament\Forms\Components\Textarea::make('notes')
+                    ->label('Visit Notes')
+                    ->placeholder('Enter any notes about this visit')
+                    ->maxLength(1000)
+                    ->columnSpanFull(),
             ]);
     }
 }

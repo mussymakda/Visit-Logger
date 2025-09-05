@@ -1,0 +1,368 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+
+/* Custom theme styles for Visit Logger */
+:root {
+    --fi-primary-50: 248 250 252;
+    --fi-primary-100: 241 245 249;
+    --fi-primary-200: 226 232 240;
+    --fi-primary-300: 203 213 225;
+    --fi-primary-400: 148 163 184;
+    --fi-primary-500: 100 116 139;
+    --fi-primary-600: 71 85 105;
+    --fi-primary-700: 51 65 85;
+    --fi-primary-800: 30 41 59;
+    --fi-primary-900: 15 23 42;
+    --fi-primary-950: 2 6 23;
+}
+
+/* Page layout improvements */
+.fi-page {
+    min-height: 100vh;
+    background-color: rgb(249 250 251);
+}
+
+.fi-page-header {
+    background-color: white;
+    border-bottom: 1px solid rgb(229 231 235);
+    padding: 1rem 1.5rem;
+}
+
+.fi-page-header-heading {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: rgb(17 24 39);
+}
+
+/* Navigation improvements */
+.fi-sidebar {
+    background-color: white;
+    border-right: 1px solid rgb(229 231 235);
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+}
+
+.fi-sidebar-nav {
+    padding: 1rem;
+}
+
+.fi-sidebar-nav-item {
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.fi-sidebar-nav-item:hover {
+    background-color: rgb(249 250 251);
+    color: rgb(17 24 39);
+}
+
+.fi-sidebar-nav-item[aria-current="page"] {
+    background-color: rgb(241 245 249);
+    color: rgb(51 65 85);
+    font-weight: 600;
+}
+
+/* Table improvements */
+.fi-ta {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+    border: 1px solid rgb(229 231 235);
+    overflow: hidden;
+}
+
+.fi-ta-header {
+    background-color: rgb(249 250 251);
+    border-bottom: 1px solid rgb(229 231 235);
+    padding: 0.75rem 1.5rem;
+}
+
+.fi-ta-header-heading {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: rgb(17 24 39);
+}
+
+.fi-ta-table {
+    width: 100%;
+}
+
+.fi-ta-row {
+    border-bottom: 1px solid rgb(243 244 246);
+    transition: background-color 0.15s ease;
+}
+
+.fi-ta-row:hover {
+    background-color: rgb(249 250 251);
+}
+
+.fi-ta-row:last-child {
+    border-bottom: none;
+}
+
+.fi-ta-cell {
+    padding: 1rem 1.5rem;
+    font-size: 0.875rem;
+}
+
+.fi-ta-header-cell {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: rgb(107 114 128);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Button improvements */
+.fi-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.fi-btn:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px currentColor;
+}
+
+.fi-btn-primary {
+    background-color: rgb(71 85 105);
+    color: white;
+}
+
+.fi-btn-primary:hover {
+    background-color: rgb(51 65 85);
+}
+
+.fi-btn-primary:focus {
+    box-shadow: 0 0 0 2px rgb(100 116 139);
+}
+
+.fi-btn-success {
+    background-color: rgb(34 197 94);
+    color: white;
+}
+
+.fi-btn-success:hover {
+    background-color: rgb(22 163 74);
+}
+
+.fi-btn-success:focus {
+    box-shadow: 0 0 0 2px rgb(34 197 94);
+}
+
+.fi-btn-secondary {
+    background-color: rgb(229 231 235);
+    color: rgb(17 24 39);
+}
+
+.fi-btn-secondary:hover {
+    background-color: rgb(209 213 219);
+}
+
+.fi-btn-secondary:focus {
+    box-shadow: 0 0 0 2px rgb(107 114 128);
+}
+
+/* Stats widget improvements */
+.fi-wi-stats-overview-stat {
+    background-color: white;
+    border: 1px solid rgb(229 231 235);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+    transition: box-shadow 0.2s ease;
+}
+
+.fi-wi-stats-overview-stat:hover {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+.fi-wi-stats-overview-stat-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: rgb(107 114 128);
+    margin-bottom: 0.5rem;
+}
+
+.fi-wi-stats-overview-stat-value {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: rgb(17 24 39);
+    margin-bottom: 0.25rem;
+}
+
+.fi-wi-stats-overview-stat-description {
+    font-size: 0.875rem;
+    color: rgb(107 114 128);
+}
+
+/* Modal improvements */
+.fi-modal {
+    border-radius: 0.75rem;
+    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+    border: 1px solid rgb(229 231 235);
+}
+
+.fi-modal-header {
+    border-bottom: 1px solid rgb(229 231 235);
+    background-color: rgb(249 250 251);
+    padding: 1rem 1.5rem;
+    border-top-left-radius: 0.75rem;
+    border-top-right-radius: 0.75rem;
+}
+
+.fi-modal-header-heading {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: rgb(17 24 39);
+}
+
+.fi-modal-content {
+    background-color: white;
+    padding: 1.5rem;
+    border-bottom-left-radius: 0.75rem;
+    border-bottom-right-radius: 0.75rem;
+}
+
+/* Form improvements */
+.fi-input {
+    display: block;
+    width: 100%;
+    border-radius: 0.5rem;
+    border: 1px solid rgb(209 213 219);
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    transition: all 0.2s ease;
+}
+
+.fi-input:focus {
+    border-color: rgb(71 85 105);
+    outline: none;
+    box-shadow: 0 0 0 1px rgb(71 85 105);
+}
+
+.fi-select {
+    display: block;
+    width: 100%;
+    border-radius: 0.5rem;
+    border: 1px solid rgb(209 213 219);
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    transition: all 0.2s ease;
+}
+
+.fi-select:focus {
+    border-color: rgb(71 85 105);
+    outline: none;
+    box-shadow: 0 0 0 1px rgb(71 85 105);
+}
+
+/* Badge improvements */
+.fi-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.fi-badge-success {
+    background-color: rgb(220 252 231);
+    color: rgb(22 101 52);
+}
+
+.fi-badge-warning {
+    background-color: rgb(254 249 195);
+    color: rgb(133 77 14);
+}
+
+.fi-badge-danger {
+    background-color: rgb(254 226 226);
+    color: rgb(153 27 27);
+}
+
+.fi-badge-info {
+    background-color: rgb(219 234 254);
+    color: rgb(30 64 175);
+}
+
+.fi-badge-gray {
+    background-color: rgb(243 244 246);
+    color: rgb(55 65 81);
+}
+
+/* Breadcrumb improvements */
+.fi-breadcrumbs {
+    display: flex;
+    align-items: center;
+    font-size: 0.875rem;
+    color: rgb(107 114 128);
+    margin-bottom: 1rem;
+}
+
+.fi-breadcrumbs-item {
+    transition: color 0.2s ease;
+}
+
+.fi-breadcrumbs-item:hover {
+    color: rgb(55 65 81);
+}
+
+/* Search and filter improvements */
+.fi-ta-search {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.fi-ta-search-input {
+    display: block;
+    width: 100%;
+    padding-left: 2.5rem;
+    padding-right: 1rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    border: 1px solid rgb(209 213 219);
+    border-radius: 0.5rem;
+}
+
+.fi-ta-search-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 1px rgb(71 85 105);
+    border-color: rgb(71 85 105);
+}
+
+/* Loading states */
+.fi-loading {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .fi-ta-cell {
+        padding: 0.75rem 1rem;
+    }
+    
+    .fi-ta-header-cell {
+        padding: 0.5rem 1rem;
+    }
+    
+    .fi-modal-content {
+        padding: 1rem;
+    }
+}

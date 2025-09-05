@@ -1,0 +1,415 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+
+/* Designer Panel Theme - Clean and Mobile-Optimized */
+:root {
+    --fi-primary-50: 239 246 255;
+    --fi-primary-100: 219 234 254;
+    --fi-primary-200: 191 219 254;
+    --fi-primary-300: 147 197 253;
+    --fi-primary-400: 96 165 250;
+    --fi-primary-500: 59 130 246;
+    --fi-primary-600: 37 99 235;
+    --fi-primary-700: 29 78 216;
+    --fi-primary-800: 30 64 175;
+    --fi-primary-900: 30 58 138;
+    --fi-primary-950: 23 37 84;
+}
+
+/* Mobile-first layout */
+.fi-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, rgb(239 246 255) 0%, rgb(219 234 254) 100%);
+}
+
+/* Dashboard specific styles */
+.fi-dashboard {
+    padding: 1rem;
+}
+
+/* QR Scanner improvements */
+.qr-scanner-container {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1);
+    border: 1px solid rgb(219 234 254);
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.qr-scanner-container.hidden {
+    opacity: 0;
+    transform: translateY(-20px);
+    pointer-events: none;
+}
+
+.qr-scanner-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.qr-scanner-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: rgb(30 64 175);
+    margin-bottom: 0.5rem;
+}
+
+.qr-scanner-description {
+    color: rgb(75 85 99);
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+#qr-reader {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    background: rgb(248 250 252);
+    border: 2px solid rgb(191 219 254);
+    transition: all 0.3s ease;
+    min-height: 320px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#qr-reader.scanning {
+    border-color: rgb(59 130 246);
+    background: rgb(239 246 255);
+}
+
+#qr-reader video {
+    width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+}
+
+/* Scanner controls */
+.scanner-controls {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.scanner-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.scanner-btn-primary {
+    background: rgb(37 99 235);
+    color: white;
+}
+
+.scanner-btn-primary:hover {
+    background: rgb(29 78 216);
+    transform: translateY(-1px);
+}
+
+.scanner-btn-secondary {
+    background: rgb(243 244 246);
+    color: rgb(55 65 81);
+}
+
+.scanner-btn-secondary:hover {
+    background: rgb(229 231 235);
+}
+
+/* Status indicators */
+.status-indicator {
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    font-weight: 500;
+    margin-top: 1rem;
+}
+
+.status-success {
+    background: rgb(220 252 231);
+    color: rgb(22 101 52);
+    border: 1px solid rgb(187 247 208);
+}
+
+.status-error {
+    background: rgb(254 226 226);
+    color: rgb(153 27 27);
+    border: 1px solid rgb(252 165 165);
+}
+
+.status-info {
+    background: rgb(219 234 254);
+    color: rgb(30 64 175);
+    border: 1px solid rgb(191 219 254);
+}
+
+/* Sponsor information card */
+.sponsor-info {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    border: 1px solid rgb(219 234 254);
+    margin-top: 1rem;
+}
+
+.sponsor-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: rgb(30 64 175);
+    margin-bottom: 0.5rem;
+}
+
+.sponsor-details {
+    color: rgb(75 85 99);
+    font-size: 0.875rem;
+    line-height: 1.6;
+}
+
+/* Photo capture */
+.photo-capture {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    border: 1px solid rgb(219 234 254);
+    margin-top: 1rem;
+}
+
+.photo-preview {
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border: 2px solid rgb(219 234 254);
+}
+
+/* Navigation improvements */
+.fi-sidebar {
+    background: white;
+    border-right: 1px solid rgb(219 234 254);
+}
+
+.fi-sidebar-nav-item {
+    border-radius: 0.5rem;
+    margin-bottom: 0.25rem;
+    transition: all 0.2s ease;
+}
+
+.fi-sidebar-nav-item:hover {
+    background: rgb(239 246 255);
+    transform: translateX(2px);
+}
+
+.fi-sidebar-nav-item[aria-current="page"] {
+    background: rgb(219 234 254);
+    color: rgb(30 64 175);
+    font-weight: 600;
+}
+
+/* Header improvements */
+.fi-topbar {
+    background: white;
+    border-bottom: 1px solid rgb(219 234 254);
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+}
+
+/* Stats widget for designer */
+.fi-wi-stats-overview-stat {
+    background: white;
+    border: 1px solid rgb(219 234 254);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    transition: all 0.2s ease;
+}
+
+.fi-wi-stats-overview-stat:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1);
+}
+
+.fi-wi-stats-overview-stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: rgb(30 64 175);
+}
+
+/* Table improvements for mobile */
+.fi-ta {
+    background: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    border: 1px solid rgb(219 234 254);
+    overflow: hidden;
+}
+
+.fi-ta-row:hover {
+    background: rgb(239 246 255);
+}
+
+/* Loading spinner */
+.loading-spinner {
+    width: 2rem;
+    height: 2rem;
+    border: 3px solid rgb(219 234 254);
+    border-top: 3px solid rgb(37 99 235);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .fi-dashboard {
+        padding: 0.75rem;
+    }
+    
+    .qr-scanner-container {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .qr-scanner-title {
+        font-size: 1.25rem;
+    }
+    
+    .scanner-controls {
+        flex-direction: column;
+    }
+    
+    .scanner-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    /* QR Reader mobile adjustments */
+    #qr-reader {
+        max-width: 100%;
+        min-height: 280px;
+    }
+    
+    /* Hide desktop-only elements on mobile */
+    .fi-sidebar {
+        display: none;
+    }
+    
+    .fi-main {
+        margin-left: 0 !important;
+    }
+    
+    /* Full-width layout on mobile */
+    .fi-page {
+        padding: 0.5rem;
+    }
+    
+    /* Larger touch targets */
+    .fi-btn {
+        min-height: 44px;
+        padding: 0.75rem 1.5rem;
+    }
+    
+    /* Better text visibility */
+    .qr-scanner-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+    }
+    
+    .qr-scanner-description {
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+}
+
+@media (max-width: 480px) {
+    .fi-page {
+        padding: 0.25rem;
+    }
+    
+    .qr-scanner-container {
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+    }
+    
+    .sponsor-info {
+        padding: 1rem;
+    }
+    
+    .photo-capture {
+        padding: 1rem;
+    }
+    
+    /* Smaller QR reader on very small screens */
+    #qr-reader {
+        min-height: 240px;
+    }
+}
+
+/* Hide unnecessary info for cleaner design */
+.fi-user-menu-trigger {
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.fi-user-menu-trigger:hover {
+    background: rgb(239 246 255);
+}
+
+/* Custom alert styles */
+.alert {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+    font-weight: 500;
+}
+
+.alert-success {
+    background: rgb(220 252 231);
+    color: rgb(22 101 52);
+    border: 1px solid rgb(187 247 208);
+}
+
+.alert-error {
+    background: rgb(254 226 226);
+    color: rgb(153 27 27);
+    border: 1px solid rgb(252 165 165);
+}
+
+/* Deep link handling for QR codes */
+.qr-deep-link {
+    display: none;
+}
+
+@media (max-width: 600px) {
+    .qr-deep-link {
+        display: block;
+        background: rgb(219 234 254);
+        color: rgb(30 64 175);
+        padding: 1rem;
+        border-radius: 0.5rem;
+        text-align: center;
+        font-weight: 500;
+        margin-bottom: 1rem;
+    }
+}

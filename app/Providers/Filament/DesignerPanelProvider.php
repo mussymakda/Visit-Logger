@@ -31,6 +31,7 @@ class DesignerPanelProvider extends PanelProvider
             ->id('designer')
             ->path('designer')
             ->login()
+            ->viteTheme('resources/css/filament/designer/theme.css')
             ->colors([
                 'primary' => Color::Blue,
             ])

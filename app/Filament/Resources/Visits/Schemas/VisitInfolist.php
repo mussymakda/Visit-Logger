@@ -39,12 +39,15 @@ class VisitInfolist
                         ImageEntry::make('photo')
                             ->label('Site Photo')
                             ->disk('public')
-                            ->size(400)
+                            ->width('100%')
+                            ->height('auto')
+                            ->extraImgAttributes(['style' => 'max-height: 400px; object-fit: contain;'])
                             ->columnSpanFull(),
                         
                         TextEntry::make('notes')
                             ->label('Notes')
                             ->placeholder('No notes provided')
+                            ->prose() // For better text formatting
                             ->columnSpanFull(),
                         
                         TextEntry::make('visit_location')

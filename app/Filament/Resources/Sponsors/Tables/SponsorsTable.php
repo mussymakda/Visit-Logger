@@ -58,6 +58,13 @@ class SponsorsTable
                     ->openUrlInNewTab()
                     ->visible(fn ($record) => $record->qr_code_path !== null),
                     
+                Action::make('directLink')
+                    ->label('Direct Link')
+                    ->icon('heroicon-o-link')
+                    ->url(fn ($record) => url("/designer?sponsor={$record->id}"))
+                    ->openUrlInNewTab()
+                    ->color('success'),
+                    
                 Action::make('regenerateQR')
                     ->label('Regenerate QR')
                     ->icon('heroicon-o-arrow-path')

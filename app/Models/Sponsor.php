@@ -39,12 +39,12 @@ class Sponsor extends Model
 
     public function generateQrCode()
     {
-        $qrData = (string) $this->id;
-        $this->qr_code = $qrData;
+        // Generate a direct link to the designer panel with sponsor parameter
+        $designerUrl = url("/designer?sponsor={$this->id}");
+        $this->qr_code = $designerUrl;
 
-        // For now, we'll just store the QR data and generate image URL via online service
-        // This avoids the GD extension requirement
-        $this->qr_code_path = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" . urlencode($qrData);
+        // Generate QR code image URL via online service
+        $this->qr_code_path = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" . urlencode($designerUrl);
         $this->saveQuietly(); // Use saveQuietly to avoid infinite loop
     }
 

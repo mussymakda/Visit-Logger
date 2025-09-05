@@ -36,6 +36,7 @@ class ReportController extends Controller
                 'Visit Count',
                 'First Visit',
                 'Last Visit',
+                'Recent Notes',
             ]);
             
             // Add data rows
@@ -56,6 +57,7 @@ class ReportController extends Controller
                             $sponsorVisits->count(),
                             $sponsorVisits->min('created_at') ? \Carbon\Carbon::parse($sponsorVisits->min('created_at'))->format('Y-m-d H:i:s') : '',
                             $sponsorVisits->max('created_at') ? \Carbon\Carbon::parse($sponsorVisits->max('created_at'))->format('Y-m-d H:i:s') : '',
+                            $sponsorVisits->sortByDesc('created_at')->first()?->notes ?? 'No notes',
                         ]);
                     }
                 } else {
@@ -170,6 +172,7 @@ class ReportController extends Controller
                 'Company Name',
                 'Contact',
                 'Location',
+                'Notes',
             ]);
             
             // Add data rows
@@ -182,6 +185,7 @@ class ReportController extends Controller
                     $visit->sponsor->company_name,
                     $visit->sponsor->contact,
                     $visit->sponsor->location,
+                    $visit->notes ?? 'No notes',
                 ]);
             }
             

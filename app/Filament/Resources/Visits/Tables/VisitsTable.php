@@ -47,8 +47,14 @@ class VisitsTable
                     ->sortable(),
                     
                 TextColumn::make('notes')
+                    ->label('Notes')
                     ->limit(50)
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->tooltip(function ($record): ?string {
+                        return $record->notes ?? null;
+                    })
+                    ->wrap()
+                    ->searchable()
+                    ->toggleable(),
             ])
             ->filters([
                 //

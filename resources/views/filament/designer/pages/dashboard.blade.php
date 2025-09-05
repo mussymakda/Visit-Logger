@@ -1,8 +1,19 @@
 <x-filament-panels::page>
     <div class="max-w-md mx-auto space-y-6">
         
+        <!-- Mobile QR Link Banner (shown when accessing via QR code link) -->
+        <div id="qr-deep-link" style="display: none;">
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+                <div class="text-blue-800 font-semibold mb-2">Processing QR Code</div>
+                <div class="text-blue-600 text-sm">Loading sponsor information...</div>
+                <div class="mt-3">
+                    <div class="loading-spinner mx-auto"></div>
+                </div>
+            </div>
+        </div>
+        
         <!-- QR Scanner Section -->
-        <x-filament::section>
+        <x-filament::section id="qr-scanner-section">
             <x-slot name="heading">
                 <div class="flex items-center justify-between">
                     <span>QR Scanner</span>
@@ -10,28 +21,25 @@
                 </div>
             </x-slot>
             
-            <!-- Authentication Status -->
-            <div class="mb-4 p-3 bg-blue-50 rounded-lg text-sm">
-                <div><strong>User:</strong> {{ auth()->user()->name }}</div>
-                <div><strong>Role:</strong> {{ auth()->user()->role }}</div>
-                <div><strong>User ID:</strong> {{ auth()->user()->id }}</div>
-                <div class="text-green-600">✓ Authenticated for API access</div>
-                <div class="text-xs text-gray-500 mt-2">If API calls fail with 401, try <a href="{{ route('filament.designer.auth.logout') }}" class="text-blue-600 underline">logging out</a> and logging back in.</div>
-            </div>
-            
             <div class="space-y-4">
                 <!-- QR Reader Display -->
                 <div class="flex justify-center">
-                    <div id="qr-reader" class="w-full max-w-sm h-64 border-2 border-gray-200 rounded-lg overflow-hidden"></div>
+                    <div id="qr-reader" class="w-full max-w-lg h-80 border-2 border-gray-200 rounded-lg overflow-hidden"></div>
                 </div>
                 
                 <!-- Scanner Controls -->
-                <div class="flex justify-center space-x-3">
+                <div class="flex justify-center space-x-3" style="display: none;">
+                    <x-filament::button 
+                        id="start-scanner" 
+                        color="primary" 
+                        size="sm"
+                    >
+                        Start Scanner
+                    </x-filament::button>
                     <x-filament::button 
                         id="stop-scanner" 
                         color="danger" 
                         size="sm"
-                        style="display: none;"
                     >
                         Stop Scanner
                     </x-filament::button>
@@ -61,11 +69,9 @@
                     
                     <div class="flex justify-center space-x-3">
                         <x-filament::button id="take-photo" color="primary">
-                            📷 Take Photo
+                            Take Photo
                         </x-filament::button>
-                        <x-filament::button id="rescan-qr" color="gray">
-                            🔄 Scan Again
-                        </x-filament::button>
+                        
                     </div>
                 </div>
             </x-filament::section>
@@ -108,10 +114,10 @@
                         >
                         <div class="space-x-3">
                             <x-filament::button id="confirm-photo" color="success">
-                                ✓ Use Photo
+                                Use Photo
                             </x-filament::button>
                             <x-filament::button id="retake-photo" color="gray">
-                                🔄 Retake
+                                Retake
                             </x-filament::button>
                         </div>
                     </div>
@@ -119,11 +125,9 @@
                     <!-- Camera Controls -->
                     <div id="camera-controls" class="flex justify-center space-x-3">
                         <x-filament::button id="capture-photo" color="primary">
-                            📸 Capture
+                            Capture
                         </x-filament::button>
-                        <x-filament::button id="stop-camera" color="gray">
-                            Stop Camera
-                        </x-filament::button>
+                        
                     </div>
                     
                     <!-- Alternative File Upload -->
@@ -135,7 +139,7 @@
                             color="gray" 
                             size="sm"
                         >
-                            📁 Choose File
+                            Choose File
                         </x-filament::button>
                     </div>
                 </div>
@@ -156,13 +160,21 @@
                     <!-- Visit Summary -->
                     <div id="visit-summary" class="bg-gray-50 rounded-lg p-4 text-sm"></div>
                     
+                    <!-- Visit Notes -->
+                    <div class="space-y-2">
+                        <label for="visit-notes" class="text-sm font-medium text-gray-700">Visit Notes (Optional)</label>
+                        <textarea
+                            id="visit-notes"
+                            rows="3"
+                            class="block w-full rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500"
+                            placeholder="Add any notes about your visit..."
+                        ></textarea>
+                    </div>
+                    
                     <!-- Submit Controls -->
-                    <div class="flex justify-center space-x-3">
+                    <div class="flex justify-center space-x-3 mt-4">
                         <x-filament::button id="confirm-submit" color="success">
-                            ✓ Submit Visit
-                        </x-filament::button>
-                        <x-filament::button id="start-over" color="gray">
-                            🔄 Start Over
+                            Submit Visit
                         </x-filament::button>
                     </div>
                     
@@ -186,13 +198,35 @@
                         <h3 class="text-lg font-semibold text-green-800">Success!</h3>
                         <p class="text-green-600">Visit logged successfully</p>
                     </div>
-                    <x-filament::button id="log-another-visit" color="success">
-                        📝 Log Another Visit
+                    <x-filament::button 
+                        id="log-another-visit" 
+                        color="success"
+                        onclick="window.location.reload()"
+                    >
+                        Log Another Visit
                     </x-filament::button>
                 </div>
             </x-filament::section>
         </div>
     </div>
+
+    @push('styles')
+    <style>
+        .loading-spinner {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3498db;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+    @endpush
 
     @push('scripts')
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -240,11 +274,37 @@
             setupEventListeners();
             console.log('Event listeners set up successfully');
             
-            // Auto-start QR scanner
-            setTimeout(() => {
-                console.log('Auto-starting QR scanner...');
-                startQRScanner();
-            }, 1000);
+            // Check for URL parameters first (for direct QR links)
+            const urlParams = new URLSearchParams(window.location.search);
+            const sponsorFromUrl = urlParams.get('sponsor');
+            
+            if (sponsorFromUrl) {
+                console.log('Sponsor ID found in URL:', sponsorFromUrl);
+                // Show mobile banner and hide scanner for direct QR access
+                document.getElementById('qr-link-banner').style.display = 'block';
+                hideScannerSection();
+                showStatus('info', 'Processing QR code link...');
+                setTimeout(() => {
+                    fetchSponsorData(parseInt(sponsorFromUrl));
+                    // Hide the banner after processing
+                    setTimeout(() => {
+                        document.getElementById('qr-link-banner').style.display = 'none';
+                    }, 2000);
+                }, 500);
+            } else {
+                // Auto-start QR scanner by default
+                showScannerSection();
+                // Start scanner with a short delay to ensure DOM is ready
+                window.setTimeout(() => {
+                    console.log('Auto-starting QR scanner...');
+                    try {
+                        startQRScanner();
+                    } catch (error) {
+                        console.error('Failed to auto-start scanner:', error);
+                        showStatus('error', 'Scanner failed to start automatically');
+                    }
+                }, 500);
+            }
         } catch (error) {
             console.error('Error during initialization:', error);
             alert('JavaScript error during initialization: ' + error.message);
@@ -255,6 +315,7 @@
         console.log('Setting up event listeners...');
         
         const elements = {
+            'start-scanner': startQRScanner,
             'stop-scanner': stopQRScanner,
             'take-photo': startPhotoCapture,
             'rescan-qr': restartScanning,
@@ -286,36 +347,92 @@
     }
 
     function startQRScanner() {
+        console.log('Starting QR scanner...');
         updateScannerStatus('Starting camera...');
         
-        html5QrcodeScanner = new Html5Qrcode("qr-reader");
+        // Clean up any existing scanner
+        if (html5QrcodeScanner) {
+            html5QrcodeScanner.stop().catch(() => {});
+        }
         
-        html5QrcodeScanner.start(
-            { facingMode: "environment" },
-            { 
-                fps: 10, 
-                qrbox: { width: 200, height: 200 },
-                aspectRatio: 1.0
-            },
-            onScanSuccess,
-            onScanError
-        ).then(() => {
-            updateScannerStatus('Scanning...');
-            document.getElementById('stop-scanner').style.display = 'inline-block';
-        }).catch((error) => {
-            console.error('QR Scanner error:', error);
-            updateScannerStatus('Camera error');
-            showStatus('error', 'Failed to start camera. Please check permissions.');
-        });
+        // Clear and prepare the QR reader element
+        const qrReader = document.getElementById('qr-reader');
+        qrReader.innerHTML = '';
+        qrReader.classList.remove('empty');
+        qrReader.classList.add('scanning');
+        
+        try {
+            html5QrcodeScanner = new Html5Qrcode("qr-reader");
+            
+            html5QrcodeScanner.start(
+                { facingMode: "environment" },
+                { 
+                    fps: 10, 
+                    qrbox: { width: 250, height: 250 },
+                    aspectRatio: 1.0
+                },
+                (decodedText) => {
+                    console.log('QR Code scanned:', decodedText);
+                    const sponsorId = parseSponsorId(decodedText);
+                    
+                    if (sponsorId) {
+                        stopQRScanner();
+                        hideScannerSection();
+                        fetchSponsorData(sponsorId);
+                    } else {
+                        showStatus('error', 'Invalid QR code format');
+                    }
+                },
+                (errorMessage) => {
+                    // Suppress frequent scan errors
+                    if (!errorMessage.includes('No QR code found')) {
+                        console.error('QR Scan error:', errorMessage);
+                    }
+                }
+            ).then(() => {
+                console.log('QR Scanner started successfully');
+                updateScannerStatus('Scanning...');
+            }).catch((error) => {
+                console.error('QR Scanner error:', error);
+                updateScannerStatus('Camera error');
+                showStatus('error', 'Failed to start camera. Please check permissions.');
+                resetScannerButtons();
+            });
+        } catch (error) {
+            console.error('Failed to initialize QR scanner:', error);
+            updateScannerStatus('Failed to start');
+            showStatus('error', 'Could not start QR scanner: ' + error.message);
+        }
     }
 
     function stopQRScanner() {
         if (html5QrcodeScanner) {
             html5QrcodeScanner.stop().then(() => {
                 updateScannerStatus('Stopped');
-                document.getElementById('stop-scanner').style.display = 'none';
+                resetScannerButtons();
+            }).catch(() => {
+                resetScannerButtons();
             });
+        } else {
+            resetScannerButtons();
         }
+    }
+
+    function resetScannerButtons() {
+        // Reset scanner button visibility (hidden by default)
+        document.getElementById('start-scanner').style.display = 'none';
+        document.getElementById('stop-scanner').style.display = 'none';
+        // Clear any scanner classes
+        document.getElementById('qr-reader').classList.remove('scanning');
+        document.getElementById('qr-reader').innerHTML = '';
+    }
+
+    function hideScannerSection() {
+        document.getElementById('qr-scanner-section').style.display = 'none';
+    }
+
+    function showScannerSection() {
+        document.getElementById('qr-scanner-section').style.display = 'block';
     }
 
     function onScanSuccess(decodedText) {
@@ -324,6 +441,7 @@
         
         if (sponsorId) {
             stopQRScanner();
+            hideScannerSection();
             fetchSponsorData(sponsorId);
         } else {
             showStatus('error', 'Invalid QR code format');
@@ -339,6 +457,15 @@
     }
 
     function parseSponsorId(qrText) {
+        // Handle direct URLs with sponsor parameter
+        try {
+            const url = new URL(qrText);
+            const sponsorFromUrl = url.searchParams.get('sponsor');
+            if (sponsorFromUrl) return parseInt(sponsorFromUrl);
+        } catch (e) {
+            // Not a valid URL, continue with other parsing
+        }
+        
         // Handle plain numbers
         if (/^\d+$/.test(qrText)) return parseInt(qrText);
         
@@ -378,12 +505,11 @@
 
     function displaySponsorInfo(sponsor) {
         document.getElementById('sponsor-details').innerHTML = `
-            <div class="bg-blue-50 rounded-lg p-4 space-y-2">
-                <h4 class="font-semibold text-blue-900">${sponsor.name}</h4>
-                <p class="text-blue-700">${sponsor.company_name}</p>
-                <div class="text-sm text-blue-600 space-y-1">
-                    <div><strong>Contact:</strong> ${sponsor.contact || 'N/A'}</div>
-                    <div><strong>Location:</strong> ${sponsor.location || 'N/A'}</div>
+            <div class="sponsor-info">
+                <div class="sponsor-name">${sponsor.name}</div>
+                <div class="sponsor-details">
+                    ${sponsor.company_name}
+                    ${sponsor.location ? `<br><small class="text-gray-600">${sponsor.location}</small>` : ''}
                 </div>
             </div>
         `;
@@ -676,7 +802,7 @@
                 <div><strong>Location:</strong> ${currentSponsor.location || 'N/A'}</div>
                 <div><strong>Date:</strong> ${now.toLocaleDateString()}</div>
                 <div><strong>Time:</strong> ${now.toLocaleTimeString()}</div>
-                <div class="flex items-center"><strong>Photo:</strong> <span class="ml-2 text-green-600">✓ Ready</span></div>
+                <div class="flex items-center"><strong>Photo:</strong> <span class="ml-2 text-green-600">Ready</span></div>
             </div>
         `;
     }
@@ -696,6 +822,10 @@
         });
         console.log('CSRF token:', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
         
+        // Get notes if provided
+        const notes = document.getElementById('visit-notes').value.trim();
+        console.log('Visit notes:', notes || 'No notes provided');
+        
         // Show progress
         document.getElementById('submit-progress').style.display = 'block';
         
@@ -703,6 +833,9 @@
         formData.append('sponsor_id', currentSponsor.id);
         formData.append('site_photo', capturedPhotoBlob, 'site-photo.jpg');
         formData.append('visited_at', new Date().toISOString());
+        if (notes) {
+            formData.append('notes', notes);
+        }
         
         fetch('/api/visits', {
             method: 'POST',
@@ -755,11 +888,25 @@
     }
 
     function restartScanning() {
-        startOver();
-        setTimeout(startQRScanner, 500);
+        // Stop current scanner if running
+        if (html5QrcodeScanner) {
+            html5QrcodeScanner.stop().catch(() => {});
+        }
+        
+        hideAllSections();
+        showScannerSection();
+        clearStatus();
+        currentSponsor = null;
+        updateScannerStatus('Ready');
+        
+        setTimeout(() => {
+            startQRScanner();
+        }, 300);
     }
 
     function startOver() {
+        console.log('Starting over...');
+        
         // Reset all state
         currentSponsor = null;
         capturedPhotoBlob = null;
@@ -769,21 +916,52 @@
         
         // Stop QR scanner if running
         if (html5QrcodeScanner) {
-            html5QrcodeScanner.stop().catch(() => {});
+            html5QrcodeScanner.stop().then(() => {
+                // Clear the QR scanner element
+                const qrReader = document.getElementById('qr-reader');
+                if (qrReader) {
+                    qrReader.innerHTML = '';
+                }
+                
+                // Show scanner section and start new scan
+                hideAllSections();
+                showScannerSection();
+                setTimeout(() => {
+                    startQRScanner();
+                }, 500);
+            }).catch(() => {
+                console.error('Error stopping QR scanner');
+                // Try to continue anyway
+                hideAllSections();
+                showScannerSection();
+                setTimeout(() => {
+                    startQRScanner();
+                }, 500);
+            });
+        } else {
+            // No active scanner, just start fresh
+            hideAllSections();
+            showScannerSection();
+            setTimeout(() => {
+                startQRScanner();
+            }, 500);
         }
         
-        // Reset UI
-        hideAllSections();
+        // Reset UI state
         hideStatus();
         updateScannerStatus('Ready');
-        document.getElementById('qr-reader').innerHTML = '';
-        document.getElementById('stop-scanner').style.display = 'none';
+        resetScannerButtons();
         
         // Clear photo preview
-        document.getElementById('preview-image').src = '';
+        const previewImage = document.getElementById('preview-image');
+        if (previewImage) {
+            previewImage.src = '';
+        }
         
-        // Restart QR scanner
-        setTimeout(startQRScanner, 1000);
+        // Auto-restart QR scanner after a short delay
+        setTimeout(() => {
+            startQRScanner();
+        }, 500);
     }
 
     function hideAllSections() {
@@ -810,6 +988,10 @@
     }
 
     function hideStatus() {
+        document.getElementById('status-container').innerHTML = '';
+    }
+
+    function clearStatus() {
         document.getElementById('status-container').innerHTML = '';
     }
     </script>

@@ -80,6 +80,7 @@ class ApiController extends Controller
                 'sponsor_id' => 'required|exists:sponsors,id',
                 'site_photo' => 'required|file|mimes:jpeg,jpg,png|max:10240', // 10MB max
                 'visited_at' => 'required|date',
+                'notes' => 'nullable|string|max:1000', // Allow optional notes
             ]);
             
             // Store the uploaded photo
@@ -94,6 +95,7 @@ class ApiController extends Controller
                 'sponsor_id' => $request->sponsor_id,
                 'photo' => $photoPath,
                 'visited_at' => $request->visited_at,
+                'notes' => $request->notes, // Save notes if provided
             ]);
             
             return response()->json([

@@ -31,6 +31,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->brandName($settings->app_name ?? 'Visit Logger')
             ->brandLogo($settings->app_logo ? asset('storage/' . $settings->app_logo) : null)
             ->brandLogoHeight('4rem')
