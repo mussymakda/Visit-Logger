@@ -2,32 +2,24 @@
 
 namespace App\Filament\Pages;
 
-use App\Models\Visit;
-use BackedEnum;
+use App\Filament\Widgets\VisitsReportTable;
 use Filament\Pages\Page;
-use Filament\Support\Icons\Heroicon;
 
 class AllVisitsReport extends Page
 {
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
-    
+    protected static ?string $title = 'All Visits Report';
     protected static ?string $navigationLabel = 'All Visits';
-    
-    protected static ?int $navigationSort = 7;
-    
-    protected string $view = 'filament.pages.all-visits-report';
-    
-    public function mount()
+    protected static ?int $navigationSort = 1;
+
+    public function getView(): string
     {
-        $this->visits = $this->getAllVisits();
+        return 'filament.pages.dashboard';
     }
-    
-    public $visits = [];
-    
-    protected function getAllVisits()
+
+    protected function getHeaderWidgets(): array
     {
-        return Visit::with(['user', 'sponsor'])
-            ->orderBy('created_at', 'desc')
-            ->get();
+        return [
+            VisitsReportTable::class,
+        ];
     }
 }

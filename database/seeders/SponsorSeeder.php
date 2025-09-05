@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Sponsor;
+use Illuminate\Database\Seeder;
 
 class SponsorSeeder extends Seeder
 {
@@ -39,19 +39,5 @@ class SponsorSeeder extends Seeder
         foreach ($sponsors as $sponsorData) {
             Sponsor::create($sponsorData);
         }
-    }
-}Database\Seeders;
-
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
-
-class SponsorSeeder extends Seeder
-{
-    /**
-     * Run the database seeds.
-     */
-    public function run(): void
-    {
-        //
     }
 }
