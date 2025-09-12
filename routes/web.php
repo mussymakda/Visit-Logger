@@ -3,11 +3,37 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Designer\DashboardController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\Auth\DesignerAuthController;
 use App\Models\Sponsor;
 
 Route::get('/', function () {
-    // Redirect to admin panel by default
-    return redirect('/admin');
+    // Redirect to designer login by default
+    return redirect('/auth/designer/login');
+});
+
+// Designer Authentication Routes (Custom)
+Route::prefix('auth/designer')->name('designer.')->group(function () {
+    Route::get('register', [DesignerAuthController::class, 'showRegistrationForm'])->name('register');
+    Route::post('register', [DesignerAuthController::class, 'register']);
+    Route::get('login', [DesignerAuthController::class, 'showLoginForm'])->name('login');
+    Route::post('login', [DesignerAuthController::class, 'login']);
+    Route::get('search', [DesignerAuthController::class, 'searchDesigners'])->name('search');
+    Route::post('logout', [DesignerAuthController::class, 'logout'])->name('logout');
+});
+
+// Backup route for original Filament designer login
+Route::get('/designer/login-backup', function () {
+    return redirect('/designer');
+})->name('designer.login.backup');
+
+// Custom login route for designer panel
+Route::get('/designer/custom-login', function () {
+    return redirect('/auth/designer/login');
+})->name('filament.designer.auth.login');
+
+// Test route for search functionality
+Route::get('/search-test', function () {
+    return view('search-test');
 });
 
 // Export routes for reports

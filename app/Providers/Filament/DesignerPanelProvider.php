@@ -30,7 +30,7 @@ class DesignerPanelProvider extends PanelProvider
         $panel = $panel
             ->id('designer')
             ->path('designer')
-            ->login()
+            ->login()  // Keep Filament login but will redirect to custom login
             ->viteTheme('resources/css/filament/designer/theme.css')
             ->colors([
                 'primary' => Color::Blue,
@@ -64,6 +64,7 @@ class DesignerPanelProvider extends PanelProvider
             ->widgets([
                 AccountWidget::class,
             ])
+            ->loginRouteSlug('custom-login')  // This will make login redirect to /designer/custom-login
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
