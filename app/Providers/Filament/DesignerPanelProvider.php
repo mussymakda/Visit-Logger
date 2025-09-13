@@ -5,15 +5,12 @@ namespace App\Providers\Filament;
 use App\Models\Settings;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
-use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -25,35 +22,41 @@ class DesignerPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
-        $settings = Settings::getInstance();
-        
+        // Try to get settings, but handle case where table doesn't exist (e.g. during testing)
+        $settings = null;
+        try {
+            $settings = Settings::getInstance();
+        } catch (\Exception $e) {
+            // Settings table doesn't exist, use defaults
+        }
+
         $panel = $panel
             ->id('designer')
             ->path('designer')
-            ->login()  // Keep Filament login but will redirect to custom login
+            ->login(false)  // Disable Filament login since we use custom auth
             ->viteTheme('resources/css/filament/designer/theme.css')
             ->colors([
                 'primary' => Color::Blue,
             ])
             ->darkMode(false)
             ->defaultThemeMode(ThemeMode::Light);
-            
+
         // Apply settings if available
         if ($settings) {
             if ($settings->app_name) {
                 $panel->brandName($settings->app_name);
             }
-            
+
             if ($settings->app_logo) {
-                $panel->brandLogo(asset('storage/' . $settings->app_logo));
+                $panel->brandLogo(asset('storage/'.$settings->app_logo));
                 $panel->brandLogoHeight('4rem');
             }
-            
+
             if ($settings->favicon) {
-                $panel->favicon(asset('storage/' . $settings->favicon));
+                $panel->favicon(asset('storage/'.$settings->favicon));
             }
         }
-        
+
         return $panel
             ->discoverResources(in: app_path('Filament/Designer/Resources'), for: 'App\Filament\Designer\Resources')
             ->discoverPages(in: app_path('Filament/Designer/Pages'), for: 'App\Filament\Designer\Pages')
@@ -64,12 +67,10 @@ class DesignerPanelProvider extends PanelProvider
             ->widgets([
                 AccountWidget::class,
             ])
-            ->loginRouteSlug('custom-login')  // This will make login redirect to /designer/custom-login
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,
-                AuthenticateSession::class,
                 ShareErrorsFromSession::class,
                 VerifyCsrfToken::class,
                 SubstituteBindings::class,
@@ -79,6 +80,6 @@ class DesignerPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-            ->authGuard('web');
+            ->authGuard('designer');
     }
 }

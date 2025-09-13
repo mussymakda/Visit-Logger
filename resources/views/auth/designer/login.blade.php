@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Designer Login - {{ config('app.name') }}</title>
+    <title>Designer Login - {{ $settings->app_name ?? config('app.name') }}</title>
+    @if($settings && $settings->favicon)
+        <link rel="icon" type="image/x-icon" href="{{ asset('storage/' . $settings->favicon) }}">
+    @endif
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -11,9 +14,15 @@
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8">
         <div>
-            <div class="mx-auto h-16 w-16 bg-blue-600 rounded-full flex items-center justify-center">
-                <i class="fas fa-sign-in-alt text-white text-2xl"></i>
-            </div>
+            @if($settings && $settings->app_logo)
+                <div class="mx-auto h-16 w-16 flex items-center justify-center">
+                    <img src="{{ asset('storage/' . $settings->app_logo) }}" alt="{{ $settings->app_name }}" class="h-16 w-auto">
+                </div>
+            @else
+                <div class="mx-auto h-16 w-16 bg-blue-600 rounded-full flex items-center justify-center">
+                    <i class="fas fa-sign-in-alt text-white text-2xl"></i>
+                </div>
+            @endif
             <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
                 Designer Login
             </h2>
@@ -79,6 +88,7 @@
                             id="remember" 
                             name="remember" 
                             type="checkbox" 
+                            checked
                             class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                         >
                         <label for="remember" class="ml-2 block text-sm text-gray-900">
@@ -107,18 +117,6 @@
                         Register here
                     </a>
                 </p>
-                
-                <div class="flex justify-center space-x-4 text-sm">
-                    <a href="/admin" class="text-blue-600 hover:text-blue-500 font-medium">
-                        <i class="fas fa-user-shield mr-1"></i>
-                        Admin Panel
-                    </a>
-                    <span class="text-gray-300">|</span>
-                    <a href="/designer" class="text-blue-600 hover:text-blue-500 font-medium">
-                        <i class="fas fa-arrow-left mr-1"></i>
-                        Standard Login
-                    </a>
-                </div>
             </div>
         </form>
     </div>

@@ -18,12 +18,12 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($request->is('admin*')) {
                 return route('filament.admin.auth.login');
             }
-            
-            // Check if request is for designer panel
+
+            // Check if request is for designer panel - redirect to custom login
             if ($request->is('designer*')) {
-                return route('filament.designer.auth.login');
+                return route('designer.login');
             }
-            
+
             // For other routes, redirect to admin panel (default)
             return route('filament.admin.auth.login');
         });

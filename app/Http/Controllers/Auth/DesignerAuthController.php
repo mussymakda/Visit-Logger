@@ -3,12 +3,13 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Settings;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 class DesignerAuthController extends Controller
@@ -18,7 +19,9 @@ class DesignerAuthController extends Controller
      */
     public function showRegistrationForm()
     {
-        return view('auth.designer.register');
+        $settings = Settings::getInstance();
+
+        return view('auth.designer.register', compact('settings'));
     }
 
     /**
@@ -43,7 +46,7 @@ class DesignerAuthController extends Controller
             'role' => 'interior_designer',
         ]);
 
-        Auth::login($user);
+        Auth::guard('designer')->login($user);
 
         return redirect()->route('filament.designer.pages.dashboard');
     }
@@ -53,7 +56,9 @@ class DesignerAuthController extends Controller
      */
     public function showLoginForm()
     {
-        return view('auth.designer.login');
+        $settings = Settings::getInstance();
+
+        return view('auth.designer.login', compact('settings'));
     }
 
     /**
@@ -73,24 +78,24 @@ class DesignerAuthController extends Controller
         // Search for user by name or email
         $user = User::where('role', 'interior_designer')
             ->where(function ($query) use ($request) {
-                $query->where('name', 'like', '%' . $request->search . '%')
-                      ->orWhere('email', $request->search);
+                $query->where('name', 'like', '%'.$request->search.'%')
+                    ->orWhere('email', $request->search);
             })
             ->first();
 
-        if (!$user) {
+        if (! $user) {
             throw ValidationException::withMessages([
                 'search' => ['No designer found with that name or email.'],
             ]);
         }
 
-        if (!Hash::check($request->password, $user->password)) {
+        if (! Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
                 'password' => ['The provided password is incorrect.'],
             ]);
         }
 
-        Auth::login($user, $request->boolean('remember'));
+        Auth::guard('designer')->login($user, $request->boolean('remember'));
 
         return redirect()->intended(route('filament.designer.pages.dashboard'));
     }
@@ -101,16 +106,17 @@ class DesignerAuthController extends Controller
     public function searchDesigners(Request $request)
     {
         $search = $request->get('q', '');
-        
+
         Log::info('Designer search called', ['query' => $search]);
-        
+
         if (strlen($search) < 2) {
             Log::info('Search too short, returning empty');
+
             return response()->json([]);
         }
 
         $designers = User::where('role', 'interior_designer')
-            ->where('name', 'like', '%' . $search . '%')
+            ->where('name', 'like', '%'.$search.'%')
             ->select('id', 'name', 'email')
             ->limit(10)
             ->get();
@@ -125,7 +131,7 @@ class DesignerAuthController extends Controller
      */
     public function logout(Request $request)
     {
-        Auth::logout();
+        Auth::guard('designer')->logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

@@ -3,6 +3,9 @@
 namespace App\Filament\Resources\Sponsors\Pages;
 
 use App\Filament\Resources\Sponsors\SponsorResource;
+use App\Models\Settings;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
 
@@ -13,6 +16,26 @@ class ViewSponsor extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('downloadPDF')
+                ->label('Download PDF QR Code')
+                ->icon('heroicon-o-document-arrow-down')
+                ->color('primary')
+                ->action(function () {
+                    $settings = Settings::getInstance();
+
+                    $pdf = Pdf::loadView('pdf.sponsor-qr', [
+                        'sponsor' => $this->record,
+                        'settings' => $settings,
+                    ]);
+
+                    $filename = 'sponsor-qr-'.str_replace(' ', '-', strtolower($this->record->name)).'.pdf';
+
+                    return response()->streamDownload(function () use ($pdf) {
+                        echo $pdf->output();
+                    }, $filename, [
+                        'Content-Type' => 'application/pdf',
+                    ]);
+                }),
             EditAction::make(),
         ];
     }

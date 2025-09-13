@@ -5,7 +5,6 @@ namespace App\Providers\Filament;
 use App\Models\Settings;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
-use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Panel;
@@ -18,24 +17,31 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
-        $settings = Settings::getInstance();
-        
+        // Try to get settings, but handle case where table doesn't exist (e.g. during testing)
+        $settings = null;
+        try {
+            $settings = Settings::getInstance();
+        } catch (\Exception $e) {
+            // Settings table doesn't exist, use defaults
+        }
+
         return $panel
             ->default()
             ->id('admin')
             ->path('admin')
             ->login()
             ->viteTheme('resources/css/filament/admin/theme.css')
-            ->brandName($settings->app_name ?? 'Visit Logger')
-            ->brandLogo($settings->app_logo ? asset('storage/' . $settings->app_logo) : null)
+            ->brandName($settings?->app_name ?? 'Visit Logger')
+            ->brandLogo($settings?->app_logo ? asset('storage/'.$settings->app_logo) : null)
             ->brandLogoHeight('4rem')
-            ->favicon($settings->favicon ? asset('storage/' . $settings->favicon) : null)
+            ->favicon($settings?->favicon ? asset('storage/'.$settings->favicon) : null)
             ->colors([
                 'primary' => Color::Slate,
                 'danger' => Color::Red,
@@ -57,11 +63,23 @@ class AdminPanelProvider extends PanelProvider
                 AccountWidget::class,
                 FilamentInfoWidget::class,
             ])
+            ->renderHook(
+                'panels::auth.login.form.before',
+                fn (): string => Blade::render('<script>
+                    document.addEventListener("DOMContentLoaded", function() {
+                        setTimeout(function() {
+                            const rememberCheckbox = document.querySelector("input[name=\"remember\"]");
+                            if (rememberCheckbox && !rememberCheckbox.checked) {
+                                rememberCheckbox.checked = true;
+                            }
+                        }, 100);
+                    });
+                </script>')
+            )
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,
-                AuthenticateSession::class,
                 ShareErrorsFromSession::class,
                 VerifyCsrfToken::class,
                 SubstituteBindings::class,

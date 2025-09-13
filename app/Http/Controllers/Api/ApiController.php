@@ -7,6 +7,8 @@ use App\Models\Sponsor;
 use App\Models\Visit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class ApiController extends Controller
 {
@@ -16,8 +18,8 @@ class ApiController extends Controller
     public function getSponsor($id)
     {
         try {
-            // Check if user is authenticated
-            if (!auth()->check()) {
+            // Check if user is authenticated (check both guards)
+            if (!Auth::check() && !Auth::guard('designer')->check()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Authentication required'
@@ -31,6 +33,7 @@ class ApiController extends Controller
                 'id' => $sponsor->id,
                 'name' => $sponsor->name,
                 'company_name' => $sponsor->company_name,
+                'google_reviews_link' => $sponsor->google_reviews_link,
                 'contact' => $sponsor->contact,
                 'location' => $sponsor->location,
                 'description' => $sponsor->description,
@@ -54,24 +57,27 @@ class ApiController extends Controller
     public function submitVisit(Request $request)
     {
         try {
-            // Debug authentication status
-            \Log::info('API Visit Submission Debug', [
-                'auth_check' => auth()->check(),
-                'auth_id' => auth()->id(),
+                        // Debug authentication status
+            Log::info('API Visit Submission Debug', [
+                'auth_check' => Auth::check(),
+                'auth_id' => Auth::id(),
+                'designer_auth_check' => Auth::guard('designer')->check(),
+                'designer_auth_id' => Auth::guard('designer')->id(),
                 'session_id' => session()->getId(),
                 'user_agent' => $request->userAgent(),
                 'ip' => $request->ip(),
                 'headers' => $request->headers->all()
             ]);
             
-            // Check if user is authenticated
-            if (!auth()->check()) {
+            // Check if user is authenticated (check both guards)
+            if (!Auth::check() && !Auth::guard('designer')->check()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Authentication required',
                     'debug' => [
                         'session_id' => session()->getId(),
                         'auth_guard' => config('auth.defaults.guard'),
+                        'designer_guard_check' => Auth::guard('designer')->check(),
                     ]
                 ], 401);
             }
@@ -86,8 +92,14 @@ class ApiController extends Controller
             // Store the uploaded photo
             $photoPath = $request->file('site_photo')->store('visit-photos', 'public');
             
-            // Use authenticated user
-            $userId = auth()->id();
+            // Prioritize designer guard for API calls, fallback to web guard
+            $userId = Auth::guard('designer')->id() ?: Auth::id();
+            
+            Log::info('API Visit User Selection', [
+                'designer_guard_id' => Auth::guard('designer')->id(),
+                'web_guard_id' => Auth::id(),
+                'selected_user_id' => $userId,
+            ]);
             
             // Create visit record
             $visit = Visit::create([

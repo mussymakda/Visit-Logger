@@ -3,16 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Designer Registration - {{ config('app.name') }}</title>
+    <title>Designer Registration - {{ $settings->app_name ?? config('app.name') }}</title>
+    @if($settings && $settings->favicon)
+        <link rel="icon" type="image/x-icon" href="{{ asset('storage/' . $settings->favicon) }}">
+    @endif
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8">
         <div>
-            <div class="mx-auto h-16 w-16 bg-blue-600 rounded-full flex items-center justify-center">
-                <i class="fas fa-user-plus text-white text-2xl"></i>
-            </div>
+            @if($settings && $settings->app_logo)
+                <div class="mx-auto h-16 w-16 flex items-center justify-center">
+                    <img src="{{ asset('storage/' . $settings->app_logo) }}" alt="{{ $settings->app_name }}" class="h-16 w-auto">
+                </div>
+            @else
+                <div class="mx-auto h-16 w-16 bg-blue-600 rounded-full flex items-center justify-center">
+                    <i class="fas fa-user-plus text-white text-2xl"></i>
+                </div>
+            @endif
             <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
                 Join as a Designer
             </h2>

@@ -30,9 +30,11 @@ return [
     | to expire immediately when the browser is closed then you may
     | indicate that via the expire_on_close configuration option.
     |
+    | Set to a very long time (1 year = 525600 minutes) to avoid expiration
+    |
     */
 
-    'lifetime' => (int) env('SESSION_LIFETIME', 120),
+    'lifetime' => (int) env('SESSION_LIFETIME', 525600), // 1 year
 
     'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', false),
 

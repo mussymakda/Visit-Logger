@@ -18,6 +18,7 @@ Route::get('/sponsors/{id}', function ($id) {
             'contact' => $sponsor->contact,
             'location' => $sponsor->location,
             'description' => $sponsor->description,
+            'google_reviews_link' => $sponsor->google_reviews_link,
         ]);
     } catch (\Exception $e) {
         return response()->json([

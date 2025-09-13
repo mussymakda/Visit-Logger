@@ -18,6 +18,18 @@ class SponsorInfolist
                 TextEntry::make('company_name')
                     ->label('Company Name'),
                     
+                ImageEntry::make('logo')
+                    ->label('Company Logo')
+                    ->disk('public')
+                    ->size(100)
+                    ->placeholder('No logo uploaded'),
+                    
+                TextEntry::make('google_reviews_link')
+                    ->label('Google Reviews Link')
+                    ->url(fn ($record) => $record->google_reviews_link)
+                    ->openUrlInNewTab()
+                    ->placeholder('Not provided'),
+                    
                 TextEntry::make('contact')
                     ->label('Contact'),
                     

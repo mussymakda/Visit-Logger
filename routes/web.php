@@ -1,10 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Designer\DashboardController;
-use App\Http\Controllers\ReportController;
 use App\Http\Controllers\Auth\DesignerAuthController;
+use App\Http\Controllers\ReportController;
 use App\Models\Sponsor;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     // Redirect to designer login by default
@@ -26,11 +25,6 @@ Route::get('/designer/login-backup', function () {
     return redirect('/designer');
 })->name('designer.login.backup');
 
-// Custom login route for designer panel
-Route::get('/designer/custom-login', function () {
-    return redirect('/auth/designer/login');
-})->name('filament.designer.auth.login');
-
 // Test route for search functionality
 Route::get('/search-test', function () {
     return view('search-test');
@@ -41,6 +35,11 @@ Route::prefix('admin/reports')->middleware(['auth', 'verified'])->name('admin.re
     Route::get('designer/export', [ReportController::class, 'exportDesignerReport'])->name('designer.export');
     Route::get('sponsor/export', [ReportController::class, 'exportSponsorReport'])->name('sponsor.export');
     Route::get('visits/export', [ReportController::class, 'exportAllVisitsReport'])->name('visits.export');
+});
+
+// PDF generation routes
+Route::middleware(['auth:web'])->group(function () {
+    Route::get('/admin/sponsors/{sponsor}/pdf', [App\Http\Controllers\SponsorPdfController::class, 'generateQrPdf'])->name('admin.sponsors.pdf');
 });
 
 // QR Scanner for Interior Designers
@@ -57,6 +56,7 @@ Route::middleware(['auth'])->group(function () {
 // Test QR codes page (for development)
 Route::get('/test-qr', function () {
     $sponsors = Sponsor::limit(5)->get();
+
     return view('test-qr', compact('sponsors'));
 });
 
@@ -67,25 +67,25 @@ Route::get('/download/sponsor-template', function () {
         'company_name',
         'contact',
         'location',
-        'description'
+        'description',
     ];
-    
-    $callback = function() use ($headers) {
+
+    $callback = function () use ($headers) {
         $file = fopen('php://output', 'w');
         fputcsv($file, $headers);
-        
+
         // Add sample data
         fputcsv($file, [
             'Sample Sponsor',
             'Sample Company Ltd',
             'contact@example.com',
             'New York, NY',
-            'Sample sponsor description'
+            'Sample sponsor description',
         ]);
-        
+
         fclose($file);
     };
-    
+
     return response()->stream($callback, 200, [
         'Content-Type' => 'text/csv',
         'Content-Disposition' => 'attachment; filename="sponsor_import_template.csv"',
@@ -96,23 +96,23 @@ Route::get('/download/designer-template', function () {
     $headers = [
         'name',
         'email',
-        'password'
+        'password',
     ];
-    
-    $callback = function() use ($headers) {
+
+    $callback = function () use ($headers) {
         $file = fopen('php://output', 'w');
         fputcsv($file, $headers);
-        
+
         // Add sample data
         fputcsv($file, [
             'John Designer',
             'john@example.com',
-            'password123'
+            'password123',
         ]);
-        
+
         fclose($file);
     };
-    
+
     return response()->stream($callback, 200, [
         'Content-Type' => 'text/csv',
         'Content-Disposition' => 'attachment; filename="designer_import_template.csv"',

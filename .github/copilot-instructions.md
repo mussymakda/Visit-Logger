@@ -12,29 +12,32 @@ This is a Laravel 12 + Filament 4 application for managing sponsors with QR code
 
 ## Critical Architecture Patterns
 
-### Dual Panel System with Role-Based Access
+### Dual-Guard Authentication System with Session Isolation
 ```php
-// User model implements panel access control
-public function canAccessPanel(Panel $panel): bool {
-    if ($panel->getId() === 'admin') return $this->isAdmin();
-    if ($panel->getId() === 'designer') return $this->isInteriorDesigner();
-    return false;
-}
+// config/auth.php - Critical: Separate guards for different user types
+'guards' => [
+    'web' => ['driver' => 'session', 'provider' => 'users'],
+    'designer' => ['driver' => 'session', 'provider' => 'users'],
+],
 ```
-- Two separate Filament panels configured via `AdminPanelProvider` and `DesignerPanelProvider`
-- Role-based routing: admins → `/admin`, designers → `/designer`
-- Shared `Settings` singleton model applies branding to both panels
+**Key Points**:
+- Two authentication guards on same user provider but separate sessions
+- Session driver must be `database` (not `file`) for proper isolation
+- API endpoints prioritize designer guard: `Auth::guard('designer')->id() ?: Auth::id()`
+- Filament panels use different guards: admin=`web`, designer=`designer`
+- Session conflicts resolved by removing `AuthenticateSession` middleware from panel providers
 
 ### Mobile-First QR Scanning Workflow
 - **Location**: `resources/views/filament/designer/pages/dashboard.blade.php`
 - **Library**: Html5Qrcode v2.3.8 (CDN-loaded)
 - **Flow**: Scan QR → Parse sponsor ID → Fetch via `/api/sponsors/{id}` → Verify → Camera photo → Submit to `/api/visits`
 - **QR Format**: Flexible parsing supports `sponsor=123`, `SPONSOR-123`, or plain `123`
+- **Camera**: Front camera default with toggle, Full HD constraints (1920x1080), no file upload option
 
 ### API Integration Points
 ```php
-// routes/api.php - Key endpoints for mobile interface
-Route::middleware('auth:web')->group(function () {
+// routes/api.php - Key endpoints with dual guard middleware
+Route::middleware(['auth:web,auth:designer'])->group(function () {
     Route::get('/sponsors/{id}', ...);    // Sponsor lookup
     Route::post('/visits', ...);          // Visit submission with photo upload
 });
@@ -48,6 +51,14 @@ This app uses Laravel Boost MCP server providing specialized tools:
 - `mcp_laravel-boost_database-schema` - Full schema inspection  
 - `mcp_laravel-boost_tinker` - Execute PHP in Laravel context
 - `mcp_laravel-boost_search-docs` - Version-specific Laravel docs
+
+### Session Configuration Critical Points
+```env
+SESSION_DRIVER=database  # NOT file - critical for dual-guard auth
+SESSION_LIFETIME=525600  # 1 year for persistent sessions
+SESSION_EXPIRE_ON_CLOSE=false
+APP_URL=http://127.0.0.1:8000  # Must match dev server for image display
+```
 
 ### Filament Resource Organization
 ```
@@ -65,6 +76,7 @@ app/Filament/
 - **sponsors**: Auto-generates QR codes on create/update via model events
 - **visits**: Links user + sponsor + photo + timestamp via foreign keys
 - **settings**: Singleton pattern for app branding across panels
+- **sessions**: Database table required for dual-guard authentication
 
 ## Project-Specific Conventions
 
@@ -74,24 +86,26 @@ app/Filament/
 - Single `make()` method pattern for component initialization
 
 ### Mobile Optimization Patterns
-- Camera access with `facingMode: "environment"` for rear camera
+- Camera access with `facingMode: "user"` for front camera default
 - Canvas-based photo capture with blob conversion for API upload
 - Touch-friendly UI with large buttons and clear visual feedback
 - Error handling with user-friendly alerts and automatic retry flows
+- No file upload option - camera capture only
 
-### QR Code Management
+### Authentication Workflow Debug Patterns
 ```php
-// Sponsors auto-generate QR codes without local image files
-public function generateQrCode() {
-    $qrData = url("/designer?sponsor={$this->id}");
-    $this->qr_code = $qrData;
-    $this->qr_code_path = "https://api.qrserver.com/v1/create-qr-code/...";
-}
+// Always log authentication context in API controllers
+Log::info('API Visit User Selection', [
+    'designer_guard_id' => Auth::guard('designer')->id(),
+    'web_guard_id' => Auth::id(),
+    'selected_user_id' => $userId,
+]);
 ```
 
 ## Key Integration Points
 - **Photo Storage**: Visit photos stored in `storage/app/public/visit-photos/`
-- **Authentication**: Uses Laravel's default web guard with session-based auth
+- **Image Display**: Requires correct `APP_URL` matching development server
+- **Authentication**: Dual-guard system with database sessions for isolation
 - **File Uploads**: Max 10MB photos via API with mimes validation
 - **CSRF Protection**: Required on all API endpoints, handled via meta tags in Blade
 
@@ -100,9 +114,13 @@ public function generateQrCode() {
 - `php artisan make:filament-page --panel=designer` - Create designer panel pages  
 - `php artisan storage:link` - Link storage for photo access
 - `php artisan make:filament-user` - Create admin users
+- `php artisan config:clear` - Clear cache after env changes (session/auth config)
 
 ## Debugging with Laravel Boost
-Use `mcp_laravel-boost_last-error` for backend exceptions and `mcp_laravel-boost_browser-logs` for frontend QR scanner issues.
+- Use `mcp_laravel-boost_last-error` for backend exceptions
+- Use `mcp_laravel-boost_browser-logs` for frontend QR scanner issues
+- Use `mcp_laravel-boost_tinker` for authentication debugging
+- Session issues often require checking both guard states and session driver
 
 ===
 

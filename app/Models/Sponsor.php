@@ -10,9 +10,11 @@ class Sponsor extends Model
     protected $fillable = [
         'name',
         'company_name',
+        'google_reviews_link',
         'contact',
         'location',
         'description',
+        'logo',
         'qr_code',
         'qr_code_path',
     ];

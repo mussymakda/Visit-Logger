@@ -139,19 +139,11 @@
                         <x-filament::button id="capture-photo" color="primary">
                             Capture
                         </x-filament::button>
-                        
-                    </div>
-                    
-                    <!-- Alternative File Upload -->
-                    <div class="text-center">
-                        <p class="text-xs text-gray-500 mb-2">Or choose from gallery:</p>
-                        <input type="file" id="file-photo" accept="image/*" capture="environment" style="display: none;">
-                        <x-filament::button 
-                            onclick="document.getElementById('file-photo').click()" 
-                            color="gray" 
-                            size="sm"
-                        >
-                            Choose File
+                        <x-filament::button id="toggle-camera" color="gray" size="sm">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                            Flip Camera
                         </x-filament::button>
                     </div>
                 </div>
@@ -186,7 +178,7 @@
                     <!-- Submit Controls -->
                     <div class="flex justify-center space-x-3 mt-4">
                         <x-filament::button id="confirm-submit" color="success">
-                            Submit Visit
+                            <span id="submit-button-text">Submit Visit</span>
                         </x-filament::button>
                     </div>
                     
@@ -330,6 +322,7 @@
     let cameraStream;
     let currentSponsor = null;
     let capturedPhotoBlob = null;
+    let currentFacingMode = "user"; // Start with front camera for selfies
 
     // Mobile navigation fix for Filament
     document.addEventListener('DOMContentLoaded', function() {
@@ -504,8 +497,8 @@
             'take-photo': startPhotoCapture,
             'rescan-qr': restartScanning,
             'capture-photo': capturePhoto,
+            'toggle-camera': toggleCamera,
             'stop-camera': stopCamera,
-            'file-photo': handleFileSelection,
             'confirm-photo': showSubmitSection,
             'retake-photo': retakePhoto,
             'confirm-submit': submitVisit,
@@ -517,11 +510,7 @@
             const element = document.getElementById(id);
             if (element) {
                 console.log(`✓ Found element: ${id}`);
-                if (id === 'file-photo') {
-                    element.addEventListener('change', handler);
-                } else {
-                    element.addEventListener('click', handler);
-                }
+                element.addEventListener('click', handler);
             } else {
                 console.warn(`✗ Element not found: ${id}`);
             }
@@ -679,7 +668,12 @@
         })
         .then(response => {
             console.log('API Response status:', response.status);
-            if (!response.ok) throw new Error('Network response was not ok');
+            if (!response.ok) {
+                const err = new Error(`HTTP ${response.status}`);
+                // attach status for downstream handling
+                err.status = response.status;
+                throw err;
+            }
             return response.json();
         })
         .then(data => {
@@ -694,11 +688,27 @@
                 showStatus('success', 'Sponsor verified!');
             } else {
                 showStatus('error', 'Sponsor not found');
+                // Auto-resume scanning so the user can try another code
+                setTimeout(() => {
+                    restartScanning();
+                }, 1000);
             }
         })
         .catch(error => {
             console.error('API Error:', error);
-            showStatus('error', 'Error fetching sponsor data');
+            const status = error?.status ?? 0;
+            if (status === 401) {
+                showStatus('error', 'Not signed in (401). Please log in again, then try scanning.');
+            } else if (status === 404) {
+                showStatus('error', 'Sponsor not found (404).');
+            } else {
+                const message = (error && error.message) ? error.message : 'Unknown error';
+                showStatus('error', `Error fetching sponsor data: ${message}`);
+            }
+            // Ensure the scanner comes back automatically after an error
+            setTimeout(() => {
+                restartScanning();
+            }, 1200);
         });
     }
 
@@ -732,12 +742,13 @@
         document.getElementById('photo-section').style.display = 'block';
         showStatus('info', 'Starting camera...');
         
-        // Request camera access
+        // Request camera access with highest quality
         navigator.mediaDevices.getUserMedia({ 
             video: { 
-                facingMode: "environment",
-                width: { ideal: 640 },
-                height: { ideal: 480 }
+                facingMode: currentFacingMode,
+                width: { ideal: 1920, min: 640 },
+                height: { ideal: 1080, min: 480 },
+                frameRate: { ideal: 30, min: 15 }
             },
             audio: false 
         })
@@ -764,6 +775,52 @@
         .catch(error => {
             console.error('Camera error:', error);
             showStatus('error', 'Failed to access camera: ' + error.message);
+        });
+    }
+
+    function toggleCamera() {
+        console.log('=== TOGGLE CAMERA ===');
+        
+        // Stop current camera stream
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(track => track.stop());
+        }
+        
+        // Toggle facing mode
+        currentFacingMode = currentFacingMode === "user" ? "environment" : "user";
+        console.log('Switching to camera:', currentFacingMode);
+        
+        // Start camera with new facing mode and highest quality
+        navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                facingMode: currentFacingMode,
+                width: { ideal: 1920, min: 640 },
+                height: { ideal: 1080, min: 480 },
+                frameRate: { ideal: 30, min: 15 }
+            },
+            audio: false 
+        })
+        .then(stream => {
+            cameraStream = stream;
+            const video = document.getElementById('camera-video');
+            video.srcObject = stream;
+            
+            // Wait for video to be ready
+            video.onloadedmetadata = () => {
+                console.log('New camera stream ready:', {
+                    facingMode: currentFacingMode,
+                    videoWidth: video.videoWidth,
+                    videoHeight: video.videoHeight
+                });
+                showStatus('success', `Switched to ${currentFacingMode === "user" ? "front" : "back"} camera`);
+            };
+        })
+        .catch(error => {
+            console.error('Camera toggle error:', error);
+            showStatus('error', 'Failed to switch camera: ' + error.message);
+            
+            // Revert to previous facing mode
+            currentFacingMode = currentFacingMode === "user" ? "environment" : "user";
         });
     }
 
@@ -871,7 +928,7 @@
                 // Stop camera stream
                 stopCamera();
                 
-            }, 'image/jpeg', 0.9);
+            }, 'image/jpeg', 1.0); // Maximum quality (100%)
             
         } catch (error) {
             console.error('Error during photo capture:', error);
@@ -888,100 +945,6 @@
         }
     }
 
-    function handleFileSelection(event) {
-        const file = event.target.files[0];
-        console.log('File selection event triggered');
-        console.log('Files array:', event.target.files);
-        
-        if (!file) {
-            console.log('No file selected');
-            showStatus('error', 'No file selected');
-            return;
-        }
-        
-        console.log('File selected:', {
-            name: file.name,
-            size: file.size,
-            type: file.type,
-            lastModified: file.lastModified
-        });
-        
-        // Check file type
-        if (!file.type.startsWith('image/')) {
-            console.error('Invalid file type:', file.type);
-            showStatus('error', 'Please select an image file');
-            return;
-        }
-        
-        // Check file size (max 10MB)
-        if (file.size > 10 * 1024 * 1024) {
-            console.error('File too large:', file.size);
-            showStatus('error', 'File too large. Please choose a file under 10MB.');
-            return;
-        }
-        
-        console.log('File validation passed, creating preview...');
-        
-        // Set the blob for submission
-        capturedPhotoBlob = file;
-        
-        // Show preview
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            console.log('FileReader onload triggered');
-            console.log('Data URL length:', e.target.result.length);
-            
-            const previewImg = document.getElementById('preview-image');
-            if (!previewImg) {
-                console.error('Preview image element not found!');
-                showStatus('error', 'Preview element not found');
-                return;
-            }
-            
-            console.log('Setting preview image src...');
-            previewImg.src = e.target.result;
-            
-            // Add onload handler to image
-            previewImg.onload = () => {
-                console.log('Image loaded successfully');
-                showStatus('success', 'Photo selected successfully!');
-            };
-            
-            previewImg.onerror = (error) => {
-                console.error('Image load error:', error);
-                showStatus('error', 'Failed to load image preview');
-            };
-            
-            // Hide camera, show preview
-            const cameraVideo = document.getElementById('camera-video');
-            const cameraControls = document.getElementById('camera-controls');
-            const photoPreview = document.getElementById('photo-preview');
-            
-            console.log('Hiding camera elements...');
-            if (cameraVideo) cameraVideo.style.display = 'none';
-            if (cameraControls) cameraControls.style.display = 'none';
-            
-            console.log('Showing photo preview...');
-            if (photoPreview) {
-                photoPreview.style.display = 'block';
-                console.log('Photo preview display set to block');
-            } else {
-                console.error('Photo preview element not found!');
-            }
-            
-            // Stop camera if running
-            stopCamera();
-        };
-        
-        reader.onerror = (error) => {
-            console.error('FileReader error:', error);
-            showStatus('error', 'Failed to read file');
-        };
-        
-        console.log('Starting FileReader...');
-        reader.readAsDataURL(file);
-    }
-
     function retakePhoto() {
         capturedPhotoBlob = null;
         document.getElementById('photo-preview').style.display = 'none';
@@ -996,6 +959,15 @@
         
         hideAllSections();
         document.getElementById('submit-section').style.display = 'block';
+        
+        // Update button text based on Google reviews link
+        const submitButtonText = document.getElementById('submit-button-text');
+        if (currentSponsor && currentSponsor.google_reviews_link) {
+            submitButtonText.textContent = 'Submit & Review on Google';
+        } else {
+            submitButtonText.textContent = 'Submit Visit';
+        }
+        
         displayVisitSummary();
     }
 
@@ -1078,6 +1050,15 @@
             if (data.success) {
                 showSuccessSection();
                 hideStatus();
+                
+                // Redirect to Google reviews if available
+                if (currentSponsor && currentSponsor.google_reviews_link) {
+                    setTimeout(() => {
+                        if (confirm('Visit submitted successfully! Would you like to leave a Google review for this sponsor?')) {
+                            window.open(currentSponsor.google_reviews_link, '_blank');
+                        }
+                    }, 1000); // Delay to show success message first
+                }
             } else {
                 showStatus('error', data.message || 'Submission failed');
             }

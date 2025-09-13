@@ -99,6 +99,8 @@ class ReportController extends Controller
             fputcsv($file, [
                 'Sponsor Name',
                 'Company',
+                'Has Logo',
+                'Google Reviews Link',
                 'Contact',
                 'Location',
                 'Designer Name',
@@ -119,6 +121,8 @@ class ReportController extends Controller
                         fputcsv($file, [
                             $sponsor->name,
                             $sponsor->company_name,
+                            $sponsor->logo ? 'Yes' : 'No',
+                            $sponsor->google_reviews_link,
                             $sponsor->contact,
                             $sponsor->location,
                             $designer->name,
@@ -132,6 +136,8 @@ class ReportController extends Controller
                     fputcsv($file, [
                         $sponsor->name,
                         $sponsor->company_name,
+                        $sponsor->logo ? 'Yes' : 'No',
+                        $sponsor->google_reviews_link,
                         $sponsor->contact,
                         $sponsor->location,
                         'No visitors',
