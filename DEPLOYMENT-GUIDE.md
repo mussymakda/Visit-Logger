@@ -1,8 +1,16 @@
 # Visit Logger - Deployment Guide
 
-A comprehensive guide for deploying the Visit Logger Laravel application to production servers.
+A comprehensive guide for deploying the Visit Logger Laravel application to production serv3. **🔑 Application Key**
+   - Generates `APP_KEY` if not set
+   - Ensures application encryption is secure
 
-## 🎯 Table of Contents
+4. **🗄️ Database Setup**
+   - Creates SQLite database file if it doesn't exist
+   - Runs `php artisan migrate --force`
+   - Seeds database with initial data
+   - Creates all necessary database tables
+
+5. **🔗 Storage Configuration**# 🎯 Table of Contents
 
 1. [Server Requirements](#server-requirements)
 2. [Pre-Deployment Setup](#pre-deployment-setup)
@@ -149,8 +157,8 @@ The deployment script performs these actions:
 
 9. **👤 Admin User Creation**
    - Creates default admin user if none exists
-   - Email: `admin@example.com`
-   - Password: `password123`
+   - Email: `admin@admin.com`
+   - Password: `admin123`
 
 ---
 
@@ -178,8 +186,13 @@ php artisan key:generate --force
 
 ### Step 4: Database Setup
 ```bash
+# Create SQLite database file
+touch database/database.sqlite
+chmod 664 database/database.sqlite
+
+# Run migrations and seeders
 php artisan migrate --force
-php artisan db:seed --class=AdminUserSeeder
+php artisan db:seed --force
 ```
 
 ### Step 5: Storage and Optimization
@@ -254,8 +267,8 @@ php artisan make:filament-user
 ```
 
 ### Method 3: Default Credentials (if script ran)
-- **Email**: `admin@example.com`
-- **Password**: `password123`
+- **Email**: `admin@admin.com`
+- **Password**: `admin123`
 - **⚠️ Change this password immediately after login!**
 
 ---
@@ -263,6 +276,17 @@ php artisan make:filament-user
 ## 🐛 Troubleshooting
 
 ### Common Issues and Solutions
+
+#### ❌ "Database file does not exist" Error
+**Problem**: SQLite database file not created
+**Solution**:
+```bash
+# Create the database file manually
+touch database/database.sqlite
+chmod 664 database/database.sqlite
+php artisan migrate --force
+php artisan db:seed --force
+```
 
 #### ❌ "Build files missing" Error
 **Problem**: Frontend assets not built

@@ -44,9 +44,21 @@ if ! grep -q "APP_KEY=base64:" .env; then
     php artisan key:generate --force
 fi
 
+# Create SQLite database file if it doesn't exist
+echo "🗄️  Setting up database..."
+if [ ! -f "database/database.sqlite" ]; then
+    echo "📋 Creating SQLite database file..."
+    touch database/database.sqlite
+    chmod 664 database/database.sqlite
+fi
+
 # Run database migrations
 echo "🗄️  Running database migrations..."
 php artisan migrate --force
+
+# Seed the database with initial data
+echo "🌱 Seeding database with initial data..."
+php artisan db:seed --force
 
 # Create storage link
 echo "🔗 Creating storage link..."
@@ -66,27 +78,14 @@ chmod -R 775 storage bootstrap/cache
 
 # Create admin user if none exists
 echo "👤 Checking for admin user..."
-php artisan tinker --execute="
-if (App\Models\User::where('role', 'admin')->count() === 0) {
-    App\Models\User::create([
-        'name' => 'Admin User',
-        'email' => 'admin@example.com',
-        'password' => bcrypt('password123'),
-        'role' => 'admin'
-    ]);
-    echo 'Admin user created: admin@example.com / password123' . PHP_EOL;
-    echo 'Please change the password after first login!' . PHP_EOL;
-} else {
-    echo 'Admin user already exists.' . PHP_EOL;
-}
-"
+php artisan db:seed --class=AdminUserSeeder --force
 
 echo "✅ Deployment completed successfully!"
 echo ""
 echo "📋 Post-deployment checklist:"
 echo "   1. Update .env file with your domain and database details"
 echo "   2. Visit your site to verify it's working"
-echo "   3. Login to /admin with admin@example.com / password123"
+echo "   3. Login to /admin with admin@admin.com / admin123"
 echo "   4. Change the admin password immediately"
 echo "   5. Create interior designer users through the admin panel"
 echo ""

@@ -31,6 +31,13 @@ if %ERRORLEVEL% neq 0 (
     php artisan key:generate --force
 )
 
+REM Create SQLite database file if it doesn't exist
+echo 🗄️  Setting up database...
+if not exist database\database.sqlite (
+    echo 📋 Creating SQLite database file...
+    type nul > database\database.sqlite
+)
+
 REM Run database migrations
 echo 🗄️  Running database migrations...
 php artisan migrate --force
