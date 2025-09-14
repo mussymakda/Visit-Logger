@@ -33,9 +33,20 @@ if %ERRORLEVEL% neq 0 (
 
 REM Create SQLite database file if it doesn't exist
 echo 🗄️  Setting up database...
+
+REM Ensure database directory exists
+if not exist database (
+    echo 📁 Creating database directory...
+    mkdir database
+)
+
+REM Create SQLite database file
 if not exist database\database.sqlite (
     echo 📋 Creating SQLite database file...
     type nul > database\database.sqlite
+    echo ✅ SQLite database file created successfully
+) else (
+    echo ✅ SQLite database file already exists
 )
 
 REM Run database migrations

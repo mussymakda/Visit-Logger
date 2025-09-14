@@ -46,14 +46,57 @@ fi
 
 # Create SQLite database file if it doesn't exist
 echo "🗄️  Setting up database..."
+
+# Ensure database directory exists
+if [ ! -d "database" ]; then
+    echo "📁 Creating database directory..."
+    mkdir -p database
+    chmod 755 database
+fi
+
+# Create SQLite database file
 if [ ! -f "database/database.sqlite" ]; then
     echo "📋 Creating SQLite database file..."
-    touch database/database.sqlite
+    # Try different methods to create the file
+    if command -v sqlite3 &> /dev/null; then
+        sqlite3 database/database.sqlite "VACUUM;"
+    else
+        touch database/database.sqlite
+    fi
+    
+    # Set proper permissions
     chmod 664 database/database.sqlite
+    
+    # Verify file was created
+    if [ -f "database/database.sqlite" ]; then
+        echo "✅ SQLite database file created successfully"
+    else
+        echo "❌ Failed to create SQLite database file"
+        echo "ℹ️  You may need to create it manually:"
+        echo "   mkdir -p database"
+        echo "   touch database/database.sqlite"
+        echo "   chmod 664 database/database.sqlite"
+        exit 1
+    fi
+else
+    echo "✅ SQLite database file already exists"
 fi
 
 # Run database migrations
 echo "🗄️  Running database migrations..."
+
+# If SQLite file still doesn't exist, try absolute path
+if [ ! -f "database/database.sqlite" ]; then
+    echo "⚠️  Trying absolute path for SQLite database..."
+    CURRENT_DIR=$(pwd)
+    export DB_DATABASE="$CURRENT_DIR/database/database.sqlite"
+    echo "DB_DATABASE=$DB_DATABASE" >> .env
+    
+    # Create with absolute path
+    touch "$DB_DATABASE"
+    chmod 664 "$DB_DATABASE"
+fi
+
 php artisan migrate --force
 
 # Seed the database with initial data
