@@ -25,7 +25,13 @@ class DesignerPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
-        $settings = Settings::getInstance();
+        try {
+            $settings = Settings::getInstance();
+        } catch (\Exception $e) {
+            // Create fallback settings if database access fails
+            $settings = new Settings();
+            $settings->app_name = config('app.name', 'Visit Logger');
+        }
         
         $panel = $panel
             ->id('designer')
