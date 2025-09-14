@@ -1,0 +1,57 @@
+---
+deployment:
+  tasks:
+    # Set deployment path to your domain's public_html directory
+    # Replace 'yourdomain' with your actual cPanel username
+    - export DEPLOYPATH=/home/yourdomain/public_html/
+    
+    # Create backup of current .env if exists
+    - if [ -f $DEPLOYPATH/.env ]; then /bin/cp $DEPLOYPATH/.env $DEPLOYPATH/.env.backup; fi
+    
+    # Copy all application files except sensitive ones
+    - /bin/cp -R app $DEPLOYPATH
+    - /bin/cp -R bootstrap $DEPLOYPATH
+    - /bin/cp -R config $DEPLOYPATH
+    - /bin/cp -R database $DEPLOYPATH
+    - /bin/cp -R resources $DEPLOYPATH
+    - /bin/cp -R routes $DEPLOYPATH
+    - /bin/cp -R vendor $DEPLOYPATH
+    
+    # Copy public files to root (since public_html IS the public directory)
+    - /bin/cp public/index.php $DEPLOYPATH
+    - /bin/cp public/favicon.ico $DEPLOYPATH
+    - /bin/cp public/robots.txt $DEPLOYPATH
+    - /bin/cp -R public/build $DEPLOYPATH
+    - /bin/cp -R public/css $DEPLOYPATH
+    - /bin/cp -R public/js $DEPLOYPATH
+    - /bin/cp -R public/fonts $DEPLOYPATH
+    
+    # Copy important root files
+    - /bin/cp artisan $DEPLOYPATH
+    - /bin/cp composer.json $DEPLOYPATH
+    - /bin/cp composer.lock $DEPLOYPATH
+    
+    # Copy deployment scripts
+    - /bin/cp deploy.sh $DEPLOYPATH
+    - /bin/cp deploy.bat $DEPLOYPATH
+    
+    # Restore .env file or copy example
+    - if [ -f $DEPLOYPATH/.env.backup ]; then /bin/cp $DEPLOYPATH/.env.backup $DEPLOYPATH/.env; else /bin/cp .env.example $DEPLOYPATH/.env; fi
+    
+    # Create storage directory structure if needed
+    - mkdir -p $DEPLOYPATH/storage/app/public
+    - mkdir -p $DEPLOYPATH/storage/logs
+    - mkdir -p $DEPLOYPATH/storage/framework/sessions
+    - mkdir -p $DEPLOYPATH/storage/framework/views
+    - mkdir -p $DEPLOYPATH/storage/framework/cache
+    
+    # Copy storage files
+    - /bin/cp -R storage/* $DEPLOYPATH/storage/
+    
+    # Set proper permissions for Laravel
+    - chmod -R 755 $DEPLOYPATH/storage
+    - chmod -R 755 $DEPLOYPATH/bootstrap/cache
+    - chmod 644 $DEPLOYPATH/.env
+    
+    # Run deployment script if available
+    - if [ -f $DEPLOYPATH/deploy.sh ]; then cd $DEPLOYPATH && chmod +x deploy.sh && ./deploy.sh; fi
