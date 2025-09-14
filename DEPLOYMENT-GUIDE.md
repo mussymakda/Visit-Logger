@@ -306,6 +306,17 @@ php artisan migrate --force
 php artisan db:seed --force
 ```
 
+#### ❌ "SQLSTATE[HY000]: General error: 1 no such table: settings"
+**Problem**: Settings model accessed before database migrations run
+**Solution**: This has been fixed in the codebase with graceful handling, but if you encounter this:
+```bash
+# Ensure migrations run first
+php artisan migrate --force
+# Then run any other commands
+php artisan config:cache
+php artisan package:discover
+```
+
 #### ❌ "Build files missing" Error
 **Problem**: Frontend assets not built
 **Solution**:
