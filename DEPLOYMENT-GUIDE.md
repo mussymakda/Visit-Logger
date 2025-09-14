@@ -128,7 +128,15 @@ The deployment script performs these actions:
 
 2. **📋 Environment Setup**
    - Creates `.env` from `.env.example` if needed
-   - Prompts you to configure environment variables
+   - **Automatically configures production settings:**
+     - Sets `APP_ENV=production` and `APP_DEBUG=false`
+     - Configures SQLite database with `DB_CONNECTION=sqlite`
+     - Sets session driver to database for shared hosting
+     - Configures cache and queue to use database
+     - Sets mail driver to log for shared hosting
+     - Optimizes log settings for production
+   - Prompts you to set `APP_URL` to your domain
+   - Validates environment configuration
 
 3. **📦 Install Dependencies**
    - Runs `composer install --no-dev --optimize-autoloader`

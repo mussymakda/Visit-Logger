@@ -20,10 +20,62 @@ echo "✅ Build files found"
 if [ ! -f .env ]; then
     echo "📋 Creating .env file from example..."
     cp .env.example .env
-    echo "⚠️  Please edit .env file with your server details before continuing!"
-    echo "   - Set APP_URL to your domain"
-    echo "   - Configure database settings"
-    echo "   - Set APP_KEY (use: php artisan key:generate)"
+    
+    echo "🔧 Configuring environment settings..."
+    
+    # Set production environment
+    sed -i 's/APP_ENV=.*/APP_ENV=production/' .env
+    sed -i 's/APP_DEBUG=.*/APP_DEBUG=false/' .env
+    
+    # Set SQLite database configuration
+    sed -i 's/DB_CONNECTION=.*/DB_CONNECTION=sqlite/' .env
+    sed -i 's|DB_DATABASE=.*|DB_DATABASE="database/database.sqlite"|' .env
+    
+    # Set session configuration for shared hosting
+    sed -i 's/SESSION_DRIVER=.*/SESSION_DRIVER=database/' .env
+    sed -i 's/SESSION_LIFETIME=.*/SESSION_LIFETIME=525600/' .env
+    sed -i 's/SESSION_EXPIRE_ON_CLOSE=.*/SESSION_EXPIRE_ON_CLOSE=false/' .env
+    
+    # Set cache and queue to database
+    sed -i 's/CACHE_STORE=.*/CACHE_STORE=database/' .env
+    sed -i 's/QUEUE_CONNECTION=.*/QUEUE_CONNECTION=database/' .env
+    
+    # Set mail to log for shared hosting
+    sed -i 's/MAIL_MAILER=.*/MAIL_MAILER=log/' .env
+    
+    # Set filesystem to local
+    sed -i 's/FILESYSTEM_DISK=.*/FILESYSTEM_DISK=local/' .env
+    
+    # Set log configuration
+    sed -i 's/LOG_CHANNEL=.*/LOG_CHANNEL=stack/' .env
+    sed -i 's/LOG_STACK=.*/LOG_STACK=single/' .env
+    sed -i 's/LOG_LEVEL=.*/LOG_LEVEL=error/' .env
+    
+    echo "✅ Environment configured for production"
+    echo "⚠️  Please update the following in .env before continuing:"
+    echo "   - Set APP_URL to your domain (e.g., https://yourdomain.com)"
+    echo "   - Update APP_NAME if desired"
+    echo ""
+    echo "Current APP_URL setting:"
+    grep "APP_URL=" .env
+    echo ""
+    echo "To set your domain, run:"
+    echo "sed -i 's|APP_URL=.*|APP_URL=https://yourdomain.com|' .env"
+    echo ""
+    echo "Then re-run: ./deploy.sh"
+    exit 1
+fi
+
+# Check if APP_URL is still set to default
+if grep -q "APP_URL=http://localhost" .env; then
+    echo "⚠️  APP_URL is still set to localhost!"
+    echo "Please update APP_URL in .env to your actual domain:"
+    echo "Current setting:"
+    grep "APP_URL=" .env
+    echo ""
+    echo "To fix this, run:"
+    echo "sed -i 's|APP_URL=.*|APP_URL=https://yourdomain.com|' .env"
+    echo "Then re-run: ./deploy.sh"
     exit 1
 fi
 

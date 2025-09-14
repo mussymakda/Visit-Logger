@@ -38,20 +38,54 @@ if (!file_exists($databaseFile)) {
 // Update .env file
 $envFile = __DIR__ . '/.env';
 if (file_exists($envFile)) {
-    echo "🔧 Updating .env file...\n";
+    echo "🔧 Updating .env file with production settings...\n";
     
     $envContent = file_get_contents($envFile);
-    $absolutePath = realpath($databaseFile);
     
-    // Update or add DB_DATABASE with relative path (works better with Laravel)
+    // Set production environment
+    $envContent = preg_replace('/APP_ENV=.*/', 'APP_ENV=production', $envContent);
+    $envContent = preg_replace('/APP_DEBUG=.*/', 'APP_DEBUG=false', $envContent);
+    
+    // Set SQLite database configuration
+    $envContent = preg_replace('/DB_CONNECTION=.*/', 'DB_CONNECTION=sqlite', $envContent);
     if (strpos($envContent, 'DB_DATABASE=') !== false) {
         $envContent = preg_replace('/DB_DATABASE=.*/', 'DB_DATABASE="database/database.sqlite"', $envContent);
     } else {
         $envContent .= "\nDB_DATABASE=\"database/database.sqlite\"\n";
     }
     
+    // Set session configuration for shared hosting
+    $envContent = preg_replace('/SESSION_DRIVER=.*/', 'SESSION_DRIVER=database', $envContent);
+    $envContent = preg_replace('/SESSION_LIFETIME=.*/', 'SESSION_LIFETIME=525600', $envContent);
+    $envContent = preg_replace('/SESSION_EXPIRE_ON_CLOSE=.*/', 'SESSION_EXPIRE_ON_CLOSE=false', $envContent);
+    
+    // Set cache and queue to database
+    $envContent = preg_replace('/CACHE_STORE=.*/', 'CACHE_STORE=database', $envContent);
+    $envContent = preg_replace('/QUEUE_CONNECTION=.*/', 'QUEUE_CONNECTION=database', $envContent);
+    
+    // Set mail to log for shared hosting
+    $envContent = preg_replace('/MAIL_MAILER=.*/', 'MAIL_MAILER=log', $envContent);
+    
+    // Set filesystem to local
+    $envContent = preg_replace('/FILESYSTEM_DISK=.*/', 'FILESYSTEM_DISK=local', $envContent);
+    
+    // Set log configuration
+    $envContent = preg_replace('/LOG_CHANNEL=.*/', 'LOG_CHANNEL=stack', $envContent);
+    $envContent = preg_replace('/LOG_STACK=.*/', 'LOG_STACK=single', $envContent);
+    $envContent = preg_replace('/LOG_LEVEL=.*/', 'LOG_LEVEL=error', $envContent);
+    
     file_put_contents($envFile, $envContent);
-    echo "✅ Updated .env with database path: database/database.sqlite\n";
+    echo "✅ Updated .env with production configuration\n";
+    echo "✅ Database configured: database/database.sqlite\n";
+} else {
+    echo "⚠️  .env file not found. Creating from example...\n";
+    if (file_exists(__DIR__ . '/.env.example')) {
+        copy(__DIR__ . '/.env.example', $envFile);
+        echo "✅ Created .env from example\n";
+        echo "⚠️  Please configure APP_URL and other settings in .env\n";
+    } else {
+        echo "❌ .env.example file not found\n";
+    }
 }
 
 echo "\n✅ Database setup complete!\n";
