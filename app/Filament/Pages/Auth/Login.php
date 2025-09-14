@@ -8,7 +8,7 @@ use Filament\Schemas\Components\Component;
 
 class Login extends BaseLogin
 {
-    protected function getRememberFormComponent(): Component
+    protected function getRememberFormComponent(): Component 
     {
         return Checkbox::make('remember')
             ->label(__('filament-panels::pages/auth/login.form.remember.label'))

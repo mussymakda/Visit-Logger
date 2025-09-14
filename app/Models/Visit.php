@@ -2,13 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Visit extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'user_id',
         'sponsor_id',
@@ -34,6 +31,6 @@ class Visit extends Model
 
     public function getPhotoUrlAttribute()
     {
-        return $this->photo ? asset('storage/'.$this->photo) : null;
+        return $this->photo ? asset('storage/' . $this->photo) : null;
     }
 }

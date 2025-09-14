@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Models\Settings;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
+use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Panel;
@@ -17,31 +18,25 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Illuminate\Support\Facades\Blade;
 
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
-        // Try to get settings, but handle case where table doesn't exist (e.g. during testing)
-        $settings = null;
-        try {
-            $settings = Settings::getInstance();
-        } catch (\Exception $e) {
-            // Settings table doesn't exist, use defaults
-        }
-
+        $settings = Settings::getInstance();
+        
         return $panel
             ->default()
             ->id('admin')
             ->path('admin')
             ->login()
             ->viteTheme('resources/css/filament/admin/theme.css')
-            ->brandName($settings?->app_name ?? 'Visit Logger')
-            ->brandLogo($settings?->app_logo ? asset('storage/'.$settings->app_logo) : null)
+            ->brandName($settings->app_name ?? 'Visit Logger')
+            ->brandLogo($settings->app_logo ? asset('storage/' . $settings->app_logo) : null)
             ->brandLogoHeight('4rem')
-            ->favicon($settings?->favicon ? asset('storage/'.$settings->favicon) : null)
+            ->favicon($settings->favicon ? asset('storage/' . $settings->favicon) : null)
             ->colors([
                 'primary' => Color::Slate,
                 'danger' => Color::Red,

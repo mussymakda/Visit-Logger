@@ -3,11 +3,11 @@
 namespace App\Filament\Resources\Sponsors\Pages;
 
 use App\Filament\Resources\Sponsors\SponsorResource;
-use App\Models\Settings;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Filament\Actions\Action;
 use Filament\Actions\EditAction;
+use Filament\Actions\Action;
 use Filament\Resources\Pages\ViewRecord;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\Settings;
 
 class ViewSponsor extends ViewRecord
 {
@@ -22,14 +22,14 @@ class ViewSponsor extends ViewRecord
                 ->color('primary')
                 ->action(function () {
                     $settings = Settings::getInstance();
-
+                    
                     $pdf = Pdf::loadView('pdf.sponsor-qr', [
                         'sponsor' => $this->record,
-                        'settings' => $settings,
+                        'settings' => $settings
                     ]);
-
-                    $filename = 'sponsor-qr-'.str_replace(' ', '-', strtolower($this->record->name)).'.pdf';
-
+                    
+                    $filename = 'sponsor-qr-' . str_replace(' ', '-', strtolower($this->record->name)) . '.pdf';
+                    
                     return response()->streamDownload(function () use ($pdf) {
                         echo $pdf->output();
                     }, $filename, [
