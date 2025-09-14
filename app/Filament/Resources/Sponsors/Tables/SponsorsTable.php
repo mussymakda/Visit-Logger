@@ -92,25 +92,8 @@ class SponsorsTable
                 Action::make('downloadQR')
                     ->label('QR Image')
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->action(function ($record) {
-                        if (!$record->qr_code_path) {
-                            return;
-                        }
-                        
-                        // Get the QR image from external service
-                        $imageContent = file_get_contents($record->qr_code_path);
-                        
-                        if ($imageContent === false) {
-                            return;
-                        }
-                        
-                        $filename = 'qr-code-' . str_replace(' ', '-', strtolower($record->name)) . '.png';
-                        
-                        return response($imageContent, 200, [
-                            'Content-Type' => 'image/png',
-                            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-                        ]);
-                    })
+                    ->url(fn ($record) => route('sponsors.download-qr', $record))
+                    ->openUrlInNewTab()
                     ->visible(fn ($record) => $record->qr_code_path !== null),
                     
                 Action::make('viewQR')

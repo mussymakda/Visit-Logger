@@ -1,13 +1,35 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Models\Sponsor;
 
-// Include test routes
+// Include test routes  
 require_once __DIR__ . '/test-qr.php';
+
+// QR Code download route
+Route::get('/sponsors/{sponsor}/download-qr', function (Sponsor $sponsor) {
+    if (!$sponsor->qr_code_path) {
+        abort(404, 'QR code not found');
+    }
+    
+    // Get the QR image from external service
+    $imageContent = file_get_contents($sponsor->qr_code_path);
+    
+    if ($imageContent === false) {
+        abort(404, 'Unable to fetch QR image');
+    }
+    
+    $filename = 'qr-code-' . str_replace(' ', '-', strtolower($sponsor->name)) . '.png';
+    
+    return response($imageContent, 200, [
+        'Content-Type' => 'image/png',
+        'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+    ]);
+})->middleware('auth')->name('sponsors.download-qr');
+
 use App\Http\Controllers\Designer\DashboardController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\Auth\DesignerAuthController;
-use App\Models\Sponsor;
 
 Route::get('/', function () {
     // Redirect to designer login by default
