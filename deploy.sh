@@ -69,7 +69,36 @@ if [ ! -f "database/database.sqlite" ]; then
     
     # Verify file was created
     if [ -f "database/database.sqlite" ]; then
-        echo "✅ SQLite database file created successfully"
+        echo ""
+echo "✅ Database file created successfully"
+
+# Run migrations immediately after database creation
+echo ""
+echo "🗄️ Running database migrations..."
+echo "Running: php artisan migrate --force"
+
+if php artisan migrate --force; then
+    echo "✅ Migrations completed successfully"
+    
+    echo ""
+    echo "🌱 Seeding database..."
+    echo "Running: php artisan db:seed --force"
+    
+    if php artisan db:seed --force; then
+        echo "✅ Database seeding completed successfully"
+        
+        echo ""
+        echo "🔐 Admin credentials:"
+        echo "Email: admin@admin.com"
+        echo "Password: admin123"
+        echo "Admin URL: $APP_URL/admin"
+        echo "Designer URL: $APP_URL/designer"
+    else
+        echo "⚠️  Database seeding may have issues"
+    fi
+else
+    echo "❌ Database migrations failed"
+fi
     else
         echo "❌ Failed to create SQLite database file"
         echo "ℹ️  You may need to create it manually:"

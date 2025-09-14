@@ -277,6 +277,24 @@ php artisan make:filament-user
 
 ### Common Issues and Solutions
 
+#### ❌ "bad interpreter: No such file or directory" Error
+**Problem**: Windows line endings (CRLF) in shell scripts on Linux server
+**Symptoms**: Error message like `bash: ./deploy.sh: /bin/bash^M: bad interpreter`
+**Solution**:
+```bash
+# Convert line endings from Windows (CRLF) to Unix (LF)
+dos2unix deploy.sh
+dos2unix setup-database.sh
+
+# Or if dos2unix is not available:
+sed -i 's/\r$//' deploy.sh
+sed -i 's/\r$//' setup-database.sh
+
+# Then make executable
+chmod +x deploy.sh
+chmod +x setup-database.sh
+```
+
 #### ❌ "Database file does not exist" Error
 **Problem**: SQLite database file not created
 **Solution**:

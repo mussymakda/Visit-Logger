@@ -44,7 +44,38 @@ REM Create SQLite database file
 if not exist database\database.sqlite (
     echo 📋 Creating SQLite database file...
     type nul > database\database.sqlite
-    echo ✅ SQLite database file created successfully
+    echo.
+echo ✅ Database file created successfully
+
+REM Run migrations immediately after database creation
+echo.
+echo 🗄️ Running database migrations...
+echo Running: php artisan migrate --force
+
+php artisan migrate --force
+if %ERRORLEVEL% equ 0 (
+    echo ✅ Migrations completed successfully
+    
+    echo.
+    echo 🌱 Seeding database...
+    echo Running: php artisan db:seed --force
+    
+    php artisan db:seed --force
+    if %ERRORLEVEL% equ 0 (
+        echo ✅ Database seeding completed successfully
+        
+        echo.
+        echo 🔐 Admin credentials:
+        echo Email: admin@admin.com
+        echo Password: admin123
+        echo Admin URL: %APP_URL%/admin
+        echo Designer URL: %APP_URL%/designer
+    ) else (
+        echo ⚠️  Database seeding may have issues
+    )
+) else (
+    echo ❌ Database migrations failed
+)
 ) else (
     echo ✅ SQLite database file already exists
 )

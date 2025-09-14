@@ -43,18 +43,49 @@ if (file_exists($envFile)) {
     $envContent = file_get_contents($envFile);
     $absolutePath = realpath($databaseFile);
     
-    // Update or add DB_DATABASE
+    // Update or add DB_DATABASE with relative path (works better with Laravel)
     if (strpos($envContent, 'DB_DATABASE=') !== false) {
-        $envContent = preg_replace('/DB_DATABASE=.*/', "DB_DATABASE=$absolutePath", $envContent);
+        $envContent = preg_replace('/DB_DATABASE=.*/', 'DB_DATABASE="database/database.sqlite"', $envContent);
     } else {
-        $envContent .= "\nDB_DATABASE=$absolutePath\n";
+        $envContent .= "\nDB_DATABASE=\"database/database.sqlite\"\n";
     }
     
     file_put_contents($envFile, $envContent);
-    echo "✅ Updated .env with database path: $absolutePath\n";
+    echo "✅ Updated .env with database path: database/database.sqlite\n";
 }
 
 echo "\n✅ Database setup complete!\n";
-echo "\nNext steps:\n";
-echo "1. php artisan migrate --force\n";
-echo "2. php artisan db:seed --force\n";
+echo "\n🗄️ Running migrations...\n";
+
+// Run migrations immediately
+echo "Running: php artisan migrate --force\n";
+$migrateOutput = shell_exec('php artisan migrate --force 2>&1');
+echo $migrateOutput;
+
+if (strpos($migrateOutput, 'Migration table created successfully') !== false || 
+    strpos($migrateOutput, 'Nothing to migrate') !== false || 
+    strpos($migrateOutput, 'Migrated:') !== false) {
+    echo "✅ Migrations completed successfully\n";
+    
+    echo "\n🌱 Seeding database...\n";
+    echo "Running: php artisan db:seed --force\n";
+    $seedOutput = shell_exec('php artisan db:seed --force 2>&1');
+    echo $seedOutput;
+    
+    if (strpos($seedOutput, 'Database seeding completed successfully') !== false ||
+        strpos($seedOutput, 'Seeding:') !== false) {
+        echo "✅ Database seeding completed successfully\n";
+        
+        echo "\n🔐 Admin credentials:\n";
+        echo "Email: admin@admin.com\n";
+        echo "Password: admin123\n";
+        echo "Login URL: " . (isset($_SERVER['HTTP_HOST']) ? 'https://' . $_SERVER['HTTP_HOST'] . '/admin' : 'your-domain.com/admin') . "\n";
+    } else {
+        echo "⚠️  Database seeding may have issues. Check output above.\n";
+    }
+} else {
+    echo "❌ Migrations failed. Error output:\n";
+    echo $migrateOutput;
+}
+
+echo "\n✅ Setup process complete!\n";

@@ -52,8 +52,33 @@ else
     sed -i "s|DB_DATABASE=.*|DB_DATABASE=$CURRENT_DIR/database/database.sqlite|" .env
 fi
 
+echo ""
 echo "✅ Database setup complete!"
 echo ""
-echo "Next steps:"
-echo "1. php artisan migrate --force"
-echo "2. php artisan db:seed --force"
+echo "🗄️ Running migrations..."
+
+# Run migrations immediately
+echo "Running: php artisan migrate --force"
+if php artisan migrate --force; then
+    echo "✅ Migrations completed successfully"
+    
+    echo ""
+    echo "🌱 Seeding database..."
+    echo "Running: php artisan db:seed --force"
+    if php artisan db:seed --force; then
+        echo "✅ Database seeding completed successfully"
+        
+        echo ""
+        echo "🔐 Admin credentials:"
+        echo "Email: admin@admin.com"
+        echo "Password: admin123"
+        echo "Login URL: your-domain.com/admin"
+    else
+        echo "⚠️  Database seeding may have issues"
+    fi
+else
+    echo "❌ Migrations failed"
+fi
+
+echo ""
+echo "✅ Setup process complete!"
