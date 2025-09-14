@@ -92,7 +92,7 @@ class SponsorsTable
                 Action::make('downloadQR')
                     ->label('QR Image')
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->url(fn ($record) => $record->qr_code_path ? Storage::url($record->qr_code_path) : null)
+                    ->url(fn ($record) => $record->qr_code_path)
                     ->openUrlInNewTab()
                     ->visible(fn ($record) => $record->qr_code_path !== null),
                     

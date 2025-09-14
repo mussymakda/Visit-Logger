@@ -52,6 +52,6 @@ class Sponsor extends Model
 
     public function getQrCodeUrlAttribute()
     {
-        return $this->qr_code_path ? Storage::url($this->qr_code_path) : null;
+        return $this->qr_code_path;
     }
 }
